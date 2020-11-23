@@ -6,16 +6,15 @@ enum TokenKind {
     String,
     Bool,
     ID,
+
+    LSquare, RSquare,
+    LParen, RParen,
+    LBrace, RBrace,
     Comma,
-    LSquare,
-    RSquare,
-    LParen,
-    RParen,
-    LBracket,
-    RBracket,
     Equals,
     Colon,
     Dot,
+
     Space,
     NL
 }
@@ -27,15 +26,17 @@ export class KDLexer {
         [true, /^`([^\\`]|\\`)*`/g, TokenKind.String],
         [true, /^(true|false)/g, TokenKind.Bool],
         [true, /^[a-zA-Z_\.][\w\._]*/g, TokenKind.ID],
+
+        [false, /^[\t\r ]+/g, TokenKind.Space],
+
+        [true, /^[\n]+/g, TokenKind.NL],
+        [true, /^\{/g, TokenKind.LBrace],
+        [true, /^\}/g, TokenKind.RBrace],
         [true, /^\,/g, TokenKind.Comma],
         [true, /^\[/g, TokenKind.LSquare],
         [true, /^\]/g, TokenKind.RSquare],
         [true, /^\(/g, TokenKind.LParen],
-        [true, /^\)/g, TokenKind.RParen],
-        [true, /^\{/g, TokenKind.LBracket],
-        [true, /^\}/g, TokenKind.RBracket],
-        [false, /^[\t\r ]+/g, TokenKind.Space],
-        [true, /^[\n]+/g, TokenKind.NL]
+        [true, /^\)/g, TokenKind.RParen]
     ]);
 
     static tokens(text:string) {
