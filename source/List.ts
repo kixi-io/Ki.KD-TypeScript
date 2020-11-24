@@ -1,4 +1,4 @@
-import { rand } from './Nums';
+import { rand } from './KMath';
 
 export class List<T> extends Array<T> {
 
@@ -18,6 +18,18 @@ export class List<T> extends Array<T> {
         }
         return this
     }
+
+    /**
+     * Gets the value at the index or `null` if its out of range.
+     * @param index
+     */
+    safeGet(index: number) : T {
+        if(index>=this.length) {
+            return null
+        }
+
+        return this[index]
+    }
 }
 
-export let listOf = (...objs) => new List(...objs)
+export let listOf = <T>(...objs) => new List<T>(...objs)

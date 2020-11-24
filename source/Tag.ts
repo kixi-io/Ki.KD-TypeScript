@@ -3,13 +3,16 @@ import { KD } from './KD'
 
 export class Tag {
 
-    values = listOf();
-    children = new List<Tag>();
-    attributes = new Map<string, any>();
-    name = "";
+    namespace = ""
+    name = ""
 
-    constructor(name = "") {
-        this.name = name;
+    values = listOf()
+    children = new List<Tag>()
+    attributes = new Map<string, any>()
+
+    constructor(name = "", namespace = "") {
+        this.name = name
+        this.namespace = namespace
     }
 
     getChild(name: string): Tag {
@@ -17,23 +20,23 @@ export class Tag {
             if(child.name == name)
                 return child
         }
-        return null;
+        return null
     }
 
     value = () => this.values[0]
 
     toString = () => {
-        let text = this.name;
+        let text = (this.namespace == "") ? this.name : `${this.namespace}:${this.name}`
 
         if(this.values != null && !this.values.isEmpty()) {
             for (const it of this.values) {
-                text += ` ${KD.stringify(it)}`;
+                text += ` ${KD.stringify(it)}`
             }
         }
 
         if(this.attributes != null && Object.keys(this.attributes).length > 0) {
             for (const k of Object.keys(this.attributes)) {
-                text += ` ${k}=${KD.stringify(this.attributes[k])}`;
+                text += ` ${k}=${KD.stringify(this.attributes[k])}`
             }
         }
 
@@ -43,6 +46,6 @@ export class Tag {
                 text+=`  ${child}\n`
             text+="}"
         }
-        return text;
+        return text
     }
 }

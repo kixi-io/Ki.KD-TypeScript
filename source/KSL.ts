@@ -8,7 +8,8 @@
  * @param id
  */
 export var $ = (id) => document.getElementById(id);
+export var $class = (className) => document.getElementsByClassName(className);
 
-export * from './Nums'
+export * from './KMath'
 export * from './Log'
 export * from './List'

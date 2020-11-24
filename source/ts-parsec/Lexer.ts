@@ -79,8 +79,10 @@ class TokenImpl<T> implements Token<T> {
             }
         }
 
-        return this.nextToken === null ? undefined : this.nextToken;
+        return this.nextToken === null ? undefined : this.nextToken
     }
+
+    toString = () => this.text ? `${this.text} (${this.kind})` : `(${this.kind})`
 }
 
 class LexerImpl<T> implements Lexer<T> {
