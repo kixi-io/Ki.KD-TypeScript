@@ -21,7 +21,6 @@ export class KDInterp {
 
         let tag: Tag
         while ((tag = this.parseTag()) != null) {
-            log("Added tag", tag)
             this.tags.add(tag)
         }
 
@@ -53,7 +52,6 @@ export class KDInterp {
         if(this.tokIndex>=this.tokens.length)
             return null
 
-        log(`Fetching index ${this.tokIndex} from ${this.tokens}`)
         let firstTok = this.current
 
         if(firstTok.kind == TokenKind.NL || firstTok.kind == TokenKind.Semicolon) {
@@ -89,6 +87,7 @@ export class KDInterp {
         if(tag) {
             if (!this.isNewLine()) this.parseValues(tag)
             if (!this.isNewLine()) this.parseAttributes(tag)
+            if (!this.isNewLine()) this.parseChildren(tag)
         }
 
         return tag;
@@ -110,11 +109,12 @@ export class KDInterp {
         while(this.tokIndex<this.tokens.length) {
             let tok = this.current
 
-            log(`Digesting potential value for tag ${tag.name}: ${tok.text.trim()} ${TokenKind[tok.kind]}`)
+            // log(`Digesting potential value for tag ${tag.name}: ${tok.text.trim()} (${TokenKind[tok.kind]})`)
 
             if(tok.kind==TokenKind.NL) {
-                log("Found NL in value list")
                 this.tokIndex++
+                return;
+            } else if(tok.kind == TokenKind.LBrace) {
                 return;
             }
 
@@ -134,6 +134,8 @@ export class KDInterp {
 
             if(keyToken.kind == TokenKind.NL || keyToken.kind == TokenKind.Semicolon) {
                 this.tokIndex++
+                return;
+            } else if(keyToken.kind == TokenKind.LBrace) {
                 return;
             }
 
@@ -171,20 +173,31 @@ export class KDInterp {
         }
     }
 
-    /*
     private parseChildren(tag: Tag) {
         this.skipNewLines()
         let tok = this.current
-        if(tok.kind == TokenKind.LBrace) {
-            inc();
+        if(tok && tok.kind == TokenKind.LBrace) {
+            this.tokIndex++
+
+            let child: Tag
+            while ((child = this.parseTag()) != null) {
+                tag.children.add(child)
+
+                let next = this.peek()
+                if(next && next.kind==TokenKind.RBrace) {
+                    this.tokIndex++
+                    return;
+                }
+            }
         }
         return;
     }
-    */
 
     private get current(): Token<TokenKind> { return this.tokens[this.tokIndex] }
 
-    private parseStringBlock(tok: Token<TokenKind>) {
+    private peek(steps = 1): Token<TokenKind> { return this.tokens.safeGet(this.tokIndex+steps) }
+
+    private static parseStringBlock(tok: Token<TokenKind>) {
         let text = tok.text.slice(1,-1)
         if(text.indexOf("\n")==-1) return text
 
@@ -221,7 +234,7 @@ export class KDInterp {
             case TokenKind.Number: { return +tok.text }
             case TokenKind.HexNumber: { return parseInt(tok.text.slice(2), 16) }
             case TokenKind.String: { return tok.text.slice(1,-1) }
-            case TokenKind.StringBlock: { return this.parseStringBlock(tok) }
+            case TokenKind.StringBlock: { return KDInterp.parseStringBlock(tok) }
             case TokenKind.Bool: { return tok.text == "true" }
             case TokenKind.ID: { return tok.text } // bare string
             case TokenKind.nil: { return null }

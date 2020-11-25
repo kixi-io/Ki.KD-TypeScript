@@ -1,5 +1,6 @@
 import { log, listOf } from './KSL'
 import { KDInterp } from './KDInterp'
+import {Tag} from "./Tag";
 
 
 let interp = new KDInterp()
@@ -46,6 +47,11 @@ tag = interp.eval(`
     Foo 1 2 
     Bar 3 4 /* foo */ greet="hi" # foo
     
-    fancy 5 6 url=https://www.nist.gov yellow=0xff00ff
+    fancy 5 6 url=https://www.nist.gov yellow=0xff00ff {
+        child1 "hi"
+        child2 "foo" {
+            Hi test=true
+        }
+    }
     `);
 log(tag)

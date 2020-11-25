@@ -25,8 +25,8 @@ export class Tag {
 
     value = () => this.values[0]
 
-    toString = () => {
-        let text = (this.namespace == "") ? this.name : `${this.namespace}:${this.name}`
+    toString = (prefix="") => {
+        let text = prefix + ((this.namespace == "") ? this.name : `${this.namespace}:${this.name}`)
 
         if(this.values != null && !this.values.isEmpty()) {
             for (const it of this.values) {
@@ -40,11 +40,13 @@ export class Tag {
             }
         }
 
-        if(this.children != null && this.children.length > 0) {
-            text+=" {\n"
-            for(var child of this.children)
-                text+=`  ${child}\n`
-            text+="}"
+        if(this.children != null && !this.children.isEmpty()) {
+            let childPrefix = prefix + "  "
+            text = text + " {\n"
+            for(const child of this.children) {
+                text = text + child.toString(childPrefix) + "\n"
+            }
+            text += (prefix + "}")
         }
         return text
     }
