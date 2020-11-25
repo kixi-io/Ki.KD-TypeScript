@@ -8,8 +8,14 @@ export class List<T> extends Array<T> {
     remove= (obj) => this.splice(this.findIndex(e => e == obj), 1)
     removeAt = (index: number) => this.splice(index, 1)
     add = (obj: T) => this.push(obj)
+    addAll(...objs: Array<T>) {
+        for(const obj of objs) {
+            this.push(obj)
+        }
+    }
     isEmpty = () => this.length == 0
-    slice = (start?: number, end?: number): List<T> => new List<T>(super.slice(start, end))
+    slice = (start?: number, end?: number): List<T> => new List<T>(...super.slice(start, end))
+
 
     shuffle() : List<T> {
         for (let i = this.length - 1; i > 0; i--) {

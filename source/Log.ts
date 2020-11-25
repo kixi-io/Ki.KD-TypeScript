@@ -14,9 +14,9 @@ export var error = (...objs) => out(console.error, objs)
  * Sends zero or more objects to console.warn. If no arguments are provided
  * the output is an empty String.
  */
-export var warn = (...objs: any) => out(console.warn, objs)
+export var warn = (...objs) => out(console.warn, objs)
 
-function out(writer: any, ...objs: any) {
+function out(writer, ...objs) {
 
     var line;
 

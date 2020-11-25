@@ -4,7 +4,9 @@ import { ParseError } from "./ParseError";
 
 export enum TokenKind {
     Number,
+    HexNumber,
     String,
+    StringBlock,
     Bool,
     ID,
     nil,
@@ -21,7 +23,8 @@ export enum TokenKind {
     Space,
     NL,
     LineComment,
-    BlockComment
+    BlockComment,
+    Semicolon,
 }
 
 export class KDLexer {
@@ -29,9 +32,10 @@ export class KDLexer {
     tokens = listOf<Token<TokenKind>>();
 
     static tokenizer = buildLexer([
+        [true, /^0x[0-9A-Fa-f]+/g, TokenKind.HexNumber],
         [true, /^\d+(\.\d+)?/g, TokenKind.Number],
         [true, /^"([^\\"]|\\")*"/g, TokenKind.String],
-        [true, /^`([^\\`]|\\`)*`/g, TokenKind.String],
+        [true, /^`([^\\`]|\\`)*`/g, TokenKind.StringBlock],
         [true, /^(true|false)/g, TokenKind.Bool],
         [true, /^nil/g, TokenKind.nil],
 
@@ -47,6 +51,7 @@ export class KDLexer {
         [true, /^}/g, TokenKind.RBrace],
         [true, /^,/g, TokenKind.Comma],
         [true, /^:/g, TokenKind.Colon],
+        [true, /^;/g, TokenKind.Semicolon],
         [true, /^\[/g, TokenKind.LSquare],
         [true, /^]/g, TokenKind.RSquare],
         [true, /^\(/g, TokenKind.LParen],
@@ -58,14 +63,13 @@ export class KDLexer {
             TokenKind.URL],
 
         // Comments
-        [false, /^(#|\/\/).*?$/g, TokenKind.LineComment],
+        // [false, /^(#|\/\/).*?$/g, TokenKind.LineComment],
+        [false, /^(#|\/\/).*/g, TokenKind.LineComment],
         // TODO: Allow nested block comments
         [false, /^\/\*(.|[\r\n])*?\*\//g, TokenKind.BlockComment]
     ]);
 
     constructor(text: string) {
-        log(`/// For line: ${text.trim()}`)
-
         let token: Token<TokenKind>
         try {
             token = KDLexer.tokenizer.parse(text)
@@ -75,21 +79,18 @@ export class KDLexer {
 
         if(!token) {
             // empty line
-            return;
+            return
         }
 
         while(true) {
-            if(token.kind == TokenKind.NL) {
-                log("(NL)")
-            } else {
-                log(`${token.text} (${TokenKind[token.kind]})`)
-            }
-
+            /*
+            if(token.kind == TokenKind.NL) log("(NL)")
+            else log(`${token.text} (${TokenKind[token.kind]})`)
+            */
             this.tokens.add(token)
 
-            token = token.next;
-            if(!token) break;
+            token = token.next
+            if(!token) break
         }
-        log()
     }
 }

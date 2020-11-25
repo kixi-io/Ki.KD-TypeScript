@@ -2,30 +2,75 @@ import {KDLexer, TokenKind} from './KDLexer'
 import {Tag} from './Tag';
 import {ParseError} from './ParseError'
 import {Token} from './ts-parsec';
-import {List} from "./List";
+import {List, listOf} from "./List";
 import {log} from "./Log";
 
 export class KDInterp {
 
+    tokIndex: number
+    tokens: List<Token<TokenKind>>
+    tags: List<Tag>
+
     eval(text: string): Tag {
+        this.tokIndex = 0
+        this.tags = listOf()
 
         let lexer = new KDLexer(text)
-        let tokens = lexer.tokens
+        this.tokens = lexer.tokens
+        if (this.tokens.length == 0) return new Tag("root")
 
-        if(tokens.length == 0) return new Tag("root")
+        let tag: Tag
+        while ((tag = this.parseTag()) != null) {
+            log("Added tag", tag)
+            this.tags.add(tag)
+        }
 
-        let tokIndex = 0
+        if (this.tags.isEmpty()) {
+            return new Tag("root")
+        } else if (this.tags.length == 1) {
+            return this.tags[0]
+        }
 
-        let firstTok = tokens[0]
-        let tag = new Tag()
+        let root = new Tag("root")
+        root.children.addAll(...this.tags)
+
+        return root
+    }
+
+    private skipNewLines() {
+        while(this.tokIndex<this.tokens.length) {
+            if(this.tokens[this.tokIndex].kind != TokenKind.NL) {
+                return;
+            }
+
+            this.tokIndex++
+        }
+    }
+
+    private parseTag(): Tag {
+        this.skipNewLines()
+
+        if(this.tokIndex>=this.tokens.length)
+            return null
+
+        log(`Fetching index ${this.tokIndex} from ${this.tokens}`)
+        let firstTok = this.current
+
+        if(firstTok.kind == TokenKind.NL || firstTok.kind == TokenKind.Semicolon) {
+            this.tokIndex++
+            return null
+        }
+
+        let tag: Tag
 
         if(firstTok.kind == TokenKind.ID) {
-            let secondTok = tokens.safeGet(1)
+            let secondTok = this.tokens.safeGet(this.tokIndex + 1)
             if(secondTok==null) {
-                tag.name = firstTok.text
-                return tag
+                return new Tag(firstTok.text)
             } else if(secondTok.kind == TokenKind.Colon) {
-                let thirdTok = tokens.safeGet(2)
+                // name & namespace
+
+                let thirdTok = this.tokens.safeGet(this.tokIndex + 2)
                 if(thirdTok==null) {
                     throw new ParseError(`Expected ID for name after namespace: but got EOL`,
                         secondTok.pos.columnEnd, secondTok.pos.rowEnd)
@@ -33,89 +78,88 @@ export class KDInterp {
                     throw new ParseError(`Expected ID for name after namespace: but got ` +
                         `${TokenKind[thirdTok.kind]}`, thirdTok.pos.columnBegin, thirdTok.pos.rowBegin)
                 }
-
-                tag.name = thirdTok.text
-                tag.namespace = firstTok.text
-                tokIndex = 3
+                tag = new Tag(thirdTok.text, firstTok.text)
+                this.tokIndex += 3
             } else {
-                tag.name = firstTok.text
-                tokIndex = 1
+                tag = new Tag(firstTok.text)
+                this.tokIndex += 1
             }
         }
 
-        tokIndex = this.parseValues(tag, tokens, tokIndex)
-        this.parseAttributes(tag, tokens, tokIndex)
+        if(tag) {
+            if (!this.isNewLine()) this.parseValues(tag)
+            if (!this.isNewLine()) this.parseAttributes(tag)
+        }
 
         return tag;
     }
 
+    private isNewLine(): boolean {
+        let lastTok = this.tokens.safeGet(this.tokIndex-1)
+        return (lastTok==null || lastTok.kind == TokenKind.NL || lastTok.kind == TokenKind.Semicolon)
+    }
+
     // TODO
 
-    indexIs(tokens:List<Token<TokenKind>>, tokIndex: number, kind:TokenKind) {
-        let tok = tokens.safeGet(tokIndex);
+    private indexIs(tokIndex: number, kind:TokenKind) {
+        let tok = this.tokens.safeGet(tokIndex)
         return tok && tok.kind == kind
     }
 
-    parseValues(tag: Tag, tokens:List<Token<TokenKind>>, tokIndex: number) {
-        log("Parsing values ---")
-        while(true) {
-            let tok = tokens.safeGet(tokIndex)
-            if(tok==null) {
-                return tokIndex
-            }
+    private parseValues(tag: Tag) {
+        while(this.tokIndex<this.tokens.length) {
+            let tok = this.current
 
-            // Remove /////
+            log(`Digesting potential value for tag ${tag.name}: ${tok.text.trim()} ${TokenKind[tok.kind]}`)
+
             if(tok.kind==TokenKind.NL) {
-                return tokIndex
+                log("Found NL in value list")
+                this.tokIndex++
+                return;
             }
-            ///////////////
 
-            if(this.indexIs(tokens, tokIndex+1, TokenKind.Equals)) {
-                // this is an attribute, return now
-                return tokIndex
+            if(this.indexIs(this.tokIndex+1, TokenKind.Equals)) {
+                // This is an attribute. Return now.
+                return;
             } else {
                 tag.values.add(this.evalLiteral(tok))
-                tokIndex++
+                this.tokIndex++
             }
         }
     }
 
-    parseAttributes(tag: Tag, tokens:List<Token<TokenKind>>, tokIndex: number) {
-        log("Parsing attributes ---")
+    private parseAttributes(tag: Tag) {
+        while(this.tokIndex<this.tokens.length) {
+            let keyToken = this.current
 
-        while(true) {
-            let keyToken = tokens.safeGet(tokIndex)
+            if(keyToken.kind == TokenKind.NL || keyToken.kind == TokenKind.Semicolon) {
+                this.tokIndex++
+                return;
+            }
 
-            if(keyToken==null) {
-                return tokIndex
-            } else if(keyToken.kind==TokenKind.NL) {
-                return tokIndex+1;
-            } else if(keyToken.kind!=TokenKind.ID) {
+            if(keyToken.kind!=TokenKind.ID) {
                 throw new ParseError(`Expected ID for attribute key but got ${TokenKind[keyToken.kind]}`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
             }
 
             let key = keyToken.text
-            log("  Got key: " + key)
 
-            tokIndex++
+            this.tokIndex++
 
-            let equalsToken = tokens.safeGet(tokIndex)
+            let equalsToken = this.tokens.safeGet(this.tokIndex)
 
             if(equalsToken == null) {
-                throw new ParseError("Expected '=' after attribute key but got EOL", keyToken.pos.columnEnd,
-                    keyToken.pos.rowBegin)
+                throw new ParseError(`Expected '=' after attribute key "${key}" but got EOL`,
+                    keyToken.pos.columnEnd, keyToken.pos.rowBegin)
             } else if(equalsToken.kind != TokenKind.Equals) {
-                throw new ParseError(`Expected '=' after attribute key but got ${TokenKind[equalsToken.kind]}`,
+                throw new ParseError(
+                    `Expected '=' after attribute key "${key}" but got ${TokenKind[equalsToken.kind]}`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
             }
 
-            log("  Got equals: " + equalsToken)
+            this.tokIndex++
 
-            tokIndex++
-            let valueToken = tokens.safeGet(tokIndex)
-
-            log("  Got value: " + valueToken)
+            let valueToken = this.tokens.safeGet(this.tokIndex)
 
             if(valueToken == null) {
                 throw new ParseError("Expected value for attribute value but got EOL", equalsToken.pos.columnEnd,
@@ -123,14 +167,61 @@ export class KDInterp {
             }
 
             tag.attributes[key]=this.evalLiteral(valueToken)
-            tokIndex++
+            this.tokIndex++
         }
     }
 
-    evalLiteral(tok: Token<TokenKind>) {
+    /*
+    private parseChildren(tag: Tag) {
+        this.skipNewLines()
+        let tok = this.current
+        if(tok.kind == TokenKind.LBrace) {
+            inc();
+        }
+        return;
+    }
+    */
+
+    private get current(): Token<TokenKind> { return this.tokens[this.tokIndex] }
+
+    private parseStringBlock(tok: Token<TokenKind>) {
+        let text = tok.text.slice(1,-1)
+        if(text.indexOf("\n")==-1) return text
+
+        let lines = text.split("\n");
+        if(lines[0].trim()=="") {
+            lines = lines.slice(1)
+        }
+
+        let last = lines[lines.length-1]
+        if(last.trim()=="") {
+            lines = lines.slice(0, lines.length-1)
+            // grab whitespace prefix and remove it from other lines if present
+            let prefix = last;
+
+            let trimmedLines = []
+
+            for(const line of lines) {
+                if(line.startsWith(prefix)) {
+                    trimmedLines.push(line.substring(prefix.length))
+                } else {
+                    trimmedLines.push(line)
+                }
+            }
+
+            lines = trimmedLines
+        }
+
+        return lines.join("\n")
+    }
+
+    private evalLiteral(tok: Token<TokenKind>) {
+
         switch(tok.kind) {
             case TokenKind.Number: { return +tok.text }
+            case TokenKind.HexNumber: { return parseInt(tok.text.slice(2), 16) }
             case TokenKind.String: { return tok.text.slice(1,-1) }
+            case TokenKind.StringBlock: { return this.parseStringBlock(tok) }
             case TokenKind.Bool: { return tok.text == "true" }
             case TokenKind.ID: { return tok.text } // bare string
             case TokenKind.nil: { return null }
