@@ -2,6 +2,8 @@
 // Licensed under the MIT license.
 
 export * from './Lexer';
+
+/*
 export * from './Parsers/ParserInterface';
 export * from './Parsers/TokenParser';
 export * from './Parsers/SequencialParser';
@@ -12,3 +14,4 @@ export * from './Parsers/ApplyParser';
 export * from './Parsers/AmbiguousParser';
 export * from './Parsers/ErrorParser';
 export * from './Parsers/Rule';
+*/
