@@ -41,9 +41,17 @@ tag = interp.eval(`
     
     fancy 5 6 url=https://www.nist.gov yellow=0xff00ff {
         child1 "hi"
-        child2 "foo" {
+        child2 "foo" favcolors=[red, green] {
             Hi test=true
         }
     }
     `);
 log(tag)
+
+log(interp.eval("nums [1,2,3]").values)
+log(interp.eval("nums [1,2,[3]]").values)
+log(interp.eval("nums [1,2,[3,4]]").values)
+log(interp.eval("nums [1,2,[3,4], 5]").values)
+log(interp.eval("nums [1,2,[3,4], 5, 6] foo").values)
+log(interp.eval("nums [1,2,[3,4,[5, 6]], 7] foo").values)
+

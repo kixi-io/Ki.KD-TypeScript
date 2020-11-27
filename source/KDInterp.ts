@@ -3,6 +3,7 @@ import {Tag} from './Tag';
 import {ParseError} from './ParseError'
 import {Token} from './ts-parsec';
 import {List, listOf} from "./List";
+import {log} from "./Log";
 
 export class KDInterp {
 
@@ -105,11 +106,9 @@ export class KDInterp {
     }
 
     private parseValues(tag: Tag) {
+
         while(this.tokIndex<this.tokens.length) {
             let tok = this.current
-
-            // log(`Digesting potential value for tag ${tag.name}: ${tok.text.trim()} (${TokenKind[tok.kind]})`)
-
             if(tok.kind==TokenKind.NL) {
                 this.tokIndex++
                 return;
@@ -120,6 +119,8 @@ export class KDInterp {
             if(this.indexIs(this.tokIndex+1, TokenKind.Equals)) {
                 // This is an attribute. Return now.
                 return;
+            } else if(tok.kind==TokenKind.LSquare) {
+                tag.values.add(this.parseList())
             } else {
                 tag.values.add(this.evalLiteral(tok))
                 this.tokIndex++
@@ -167,9 +168,37 @@ export class KDInterp {
                     equalsToken.pos.rowBegin)
             }
 
-            tag.attributes[key]=this.evalLiteral(valueToken)
+            if(valueToken.kind==TokenKind.LSquare) {
+                tag.attributes[key]=this.parseList()
+            } else {
+                tag.attributes[key] = this.evalLiteral(valueToken)
+            }
+
             this.tokIndex++
         }
+    }
+
+    private parseList() : List<any> {
+        let tok = this.current
+        let list = listOf()
+
+        this.tokIndex++
+
+        while(this.tokIndex<this.tokens.length) {
+            tok = this.current
+            if(tok.kind == TokenKind.LSquare) {
+                list.add(this.parseList())
+            } else if(tok.kind == TokenKind.RSquare) {
+                // move past the ]
+                this.tokIndex++
+                break;
+            } else {
+                list.add(this.evalLiteral(tok))
+                this.tokIndex++
+            }
+        }
+
+        return list
     }
 
     private parseChildren(tag: Tag) {
@@ -239,7 +268,7 @@ export class KDInterp {
             case TokenKind.nil: { return null }
             case TokenKind.URL: { return new URL(tok.text) }
             default: {
-                throw new ParseError("Internal Error: Unknown token type for literal: " + TokenKind[tok.kind],
+                throw new ParseError("Parse Error: Unknown token type for literal: " + TokenKind[tok.kind],
                     tok.pos.columnBegin, tok.pos.rowBegin)
             }
         }

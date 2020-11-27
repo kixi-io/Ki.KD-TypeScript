@@ -50,7 +50,7 @@ export class KDLexer {
 
         [true, /^{/g, TokenKind.LBrace],
         [true, /^}/g, TokenKind.RBrace],
-        [true, /^,/g, TokenKind.Comma],
+        [false, /^,/g, TokenKind.Comma],
         [true, /^:/g, TokenKind.Colon],
         [true, /^;/g, TokenKind.Semicolon],
         [true, /^\[/g, TokenKind.LSquare],
@@ -88,6 +88,8 @@ export class KDLexer {
             if(token.kind == TokenKind.NL) log("(NL)")
             else log(`${token.text} (${TokenKind[token.kind]})`)
             */
+
+
             this.tokens.add(token)
 
             token = token.next
