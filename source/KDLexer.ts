@@ -33,7 +33,8 @@ export class KDLexer {
 
     static tokenizer = buildLexer([
         [true, /^0x[0-9A-Fa-f]+/g, TokenKind.HexNumber],
-        [true, /^\d+(\.\d+)?/g, TokenKind.Number],
+        // [true, /^\d+(\.\d+)?/g, TokenKind.Number],
+        [true, /^\d[\d_]*(\.\d+)?/g, TokenKind.Number],
         [true, /^"([^\\"]|\\")*"/g, TokenKind.String],
         [true, /^`([^\\`]|\\`)*`/g, TokenKind.StringBlock],
         [true, /^(true|false)/g, TokenKind.Bool],

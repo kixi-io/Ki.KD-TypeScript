@@ -13,3 +13,5 @@ export var $class = (className) => document.getElementsByClassName(className);
 export * from './KMath'
 export * from './Log'
 export * from './List'
+
+export * from './Array+'

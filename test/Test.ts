@@ -7,7 +7,7 @@ let tag = interp.eval("foo 12 bill `hi` true false nil")
 log("-- Tag ----")
 log(tag)
 
-tag = interp.eval("foo:nugget 12 bill `hi` true false nil")
+tag = interp.eval("foo:nugget 12_000_000 bill `hi` true false nil")
 log("-- Tag ----")
 log(tag)
 

@@ -230,7 +230,7 @@ export class KDInterp {
     private evalLiteral(tok: Token<TokenKind>) {
 
         switch(tok.kind) {
-            case TokenKind.Number: { return +tok.text }
+            case TokenKind.Number: { return +(tok.text.replace(/_/g, "")) }
             case TokenKind.HexNumber: { return parseInt(tok.text.slice(2), 16) }
             case TokenKind.String: { return tok.text.slice(1,-1) }
             case TokenKind.StringBlock: { return KDInterp.parseStringBlock(tok) }
