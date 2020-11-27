@@ -1,4 +1,4 @@
-import { rand } from './KMath';
+import {rand} from './KMath';
 
 export class List<T> extends Array<T> {
 

@@ -3,7 +3,6 @@ import {Tag} from './Tag';
 import {ParseError} from './ParseError'
 import {Token} from './ts-parsec';
 import {List, listOf} from "./List";
-import {log} from "./Log";
 
 export class KDInterp {
 

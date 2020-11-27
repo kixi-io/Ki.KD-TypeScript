@@ -1,5 +1,5 @@
-import { listOf, List } from './KSL'
-import { KD } from './KD'
+import {List, listOf} from './KSL'
+import {KD} from './KD'
 
 export class Tag {
 
