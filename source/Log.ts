@@ -1,29 +1,40 @@
 /**
+ * These logging utility methods are used in lieu of console .log, .warn, .error and .info to provide consistent behavior
+ * on all platforms. Many platforms do strange things with console.error.
+ */
+
+/**
  * Logs zero or more objects to the console. If no arguments are provided
  * a blank line is logged.
  */
-export var log = (...objs) => out(console.log, ...objs);
+export var log = (...objs) => out(console.log, "", ...objs);
 
 /**
  * Sends zero or more objects to console.error. If no arguments are provided
- * the output is an empty String.
+ * a blank line is logged.
  */
-export var error = (...objs) => out(console.error, ...objs)
+export var error = (...objs) => out(console.log, "🟥 ", ...objs)
+
+/**
+ * Sends zero or more objects to console.error. If no arguments are provided
+ * a blank line is logged.
+ */
+export var info = (...objs) => out(console.log,"🟩 ", ...objs)
 
 /**
  * Sends zero or more objects to console.warn. If no arguments are provided
- * the output is an empty String.
+ * a blank line is logged.
  */
-export var warn = (...objs) => out(console.warn, ...objs)
+export var warn = (...objs) => out(console.log, "🟧 ", ...objs)
 
-function out(writer, ...objs) {
+function out(writer, prefix, ...objs) {
 
     var line;
 
     if(objs==null || objs.length == 0) {
         line = ""
     } else {
-        line = ""
+        line = prefix
 
         let i = 0
         for(const obj of objs) {

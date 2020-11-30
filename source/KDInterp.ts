@@ -54,12 +54,8 @@ export class KDInterp {
 
         let firstTok = this.current
 
-        if(firstTok.kind == TokenKind.NL || firstTok.kind == TokenKind.Semicolon) {
-            this.tokIndex++
-            return null
-        }
-
         let tag: Tag
+        let anon = false
 
         if(firstTok.kind == TokenKind.ID) {
             let secondTok = this.tokens.safeGet(this.tokIndex + 1)
@@ -82,20 +78,37 @@ export class KDInterp {
                 tag = new Tag(firstTok.text)
                 this.tokIndex += 1
             }
+        } else if(KDInterp.isLiteral(firstTok.kind) || firstTok.kind==TokenKind.LSquare) {
+            anon = true
+            tag = new Tag() // anonymous tag
         }
 
         if(tag) {
-            if (!this.isNewLine()) this.parseValues(tag)
-            if (!this.isNewLine()) this.parseAttributes(tag)
-            if (!this.isNewLine()) this.parseChildren(tag)
+            if (!this.isNewLine() || anon) this.parseValues(tag)
+            if (!this.isNewLine() || anon) this.parseAttributes(tag)
+            if (!this.isNewLine() || anon) this.parseChildren(tag)
         }
 
         return tag;
     }
 
+    private static isLiteral(kind: TokenKind) {
+        switch(kind) {
+            case TokenKind.String:
+            case TokenKind.Number:
+            case TokenKind.Bool:
+            case TokenKind.URL:
+            case TokenKind.nil:
+                return true
+        }
+
+        return false
+    }
+
     private isNewLine(): boolean {
         let lastTok = this.tokens.safeGet(this.tokIndex-1)
-        return (lastTok==null || lastTok.kind == TokenKind.NL || lastTok.kind == TokenKind.Semicolon)
+        return (this.tokIndex == 0 || lastTok==null || lastTok.kind == TokenKind.NL ||
+            lastTok.kind == TokenKind.Semicolon)
     }
 
     // TODO
@@ -106,7 +119,6 @@ export class KDInterp {
     }
 
     private parseValues(tag: Tag) {
-
         while(this.tokIndex<this.tokens.length) {
             let tok = this.current
             if(tok.kind==TokenKind.NL) {
@@ -169,36 +181,13 @@ export class KDInterp {
             }
 
             if(valueToken.kind==TokenKind.LSquare) {
-                tag.attributes[key]=this.parseList()
+                tag.attributes.set(key, this.parseList())
             } else {
-                tag.attributes[key] = this.evalLiteral(valueToken)
+                tag.attributes.set(key, this.evalLiteral(valueToken))
             }
 
             this.tokIndex++
         }
-    }
-
-    private parseList() : List<any> {
-        let tok = this.current
-        let list = listOf()
-
-        this.tokIndex++
-
-        while(this.tokIndex<this.tokens.length) {
-            tok = this.current
-            if(tok.kind == TokenKind.LSquare) {
-                list.add(this.parseList())
-            } else if(tok.kind == TokenKind.RSquare) {
-                // move past the ]
-                this.tokIndex++
-                break;
-            } else {
-                list.add(this.evalLiteral(tok))
-                this.tokIndex++
-            }
-        }
-
-        return list
     }
 
     private parseChildren(tag: Tag) {
@@ -206,14 +195,14 @@ export class KDInterp {
         let tok = this.current
         if(tok && tok.kind == TokenKind.LBrace) {
             this.tokIndex++
-
             let child: Tag
             while ((child = this.parseTag()) != null) {
+                log(`Got child: ${child} for ${tag}`)
                 tag.children.add(child)
-
                 let next = this.peek()
                 if(next && next.kind==TokenKind.RBrace) {
                     this.tokIndex++
+                    log(`At end of children: ${this.current.text}`)
                     return;
                 }
             }
@@ -224,6 +213,32 @@ export class KDInterp {
     private get current(): Token<TokenKind> { return this.tokens[this.tokIndex] }
 
     private peek(steps = 1): Token<TokenKind> { return this.tokens.safeGet(this.tokIndex+steps) }
+
+    private parseList() : List<any> {
+        let tok = this.current
+        let list = listOf()
+
+        this.tokIndex++
+
+        while(this.tokIndex<this.tokens.length) {
+            this.skipNewLines()
+            tok = this.current
+            if(tok.kind == TokenKind.LSquare) {
+                // start a sublist
+                list.add(this.parseList())
+            } else if(tok.kind == TokenKind.RSquare) {
+                // move past the ]
+                this.tokIndex++
+                break;
+            } else {
+                list.add(this.evalLiteral(tok))
+                // on to next element
+                this.tokIndex++
+            }
+        }
+
+        return list
+    }
 
     private static parseStringBlock(tok: Token<TokenKind>) {
         let text = tok.text.slice(1,-1)
