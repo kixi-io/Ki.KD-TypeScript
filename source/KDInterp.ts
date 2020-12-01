@@ -197,7 +197,7 @@ export class KDInterp {
             this.tokIndex++
             let child: Tag
             while ((child = this.parseTag()) != null) {
-                log(`Got child: ${child} for ${tag}`)
+                // log(`Got child: ${child} for ${tag}`)
                 tag.children.add(child)
                 let next = this.peek()
                 if(next && next.kind==TokenKind.RBrace) {

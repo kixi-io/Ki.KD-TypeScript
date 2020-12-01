@@ -14,7 +14,7 @@ export class QA {
         this.name = name
     }
 
-    section(name: string, prefix='🌼 ') {
+    section(name: string, prefix='📐 ') {
         log()
         log(QA.padWithLine(prefix + name + ' '))
     }

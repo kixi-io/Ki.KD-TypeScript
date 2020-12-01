@@ -1,37 +1,54 @@
 import {List, listOf} from './KSL'
 import {KD} from './KD'
+import {NSID} from './NSID'
+import './String+'
 
 export class Tag {
 
-    namespace = ""
-    name = ""
+    nsid: NSID
 
     values = listOf()
     children = new List<Tag>()
-    attributes = new Map<string, any>()
+    attributes = new Map<NSID, any>()
 
     constructor(name = "", namespace = "") {
-        this.name = name
-        this.namespace = namespace
+        this.nsid = new NSID(name, namespace)
     }
 
     getChild(name: string): Tag {
         for (const child of this.children) {
-            if(child.name == name)
+            if (child.nsid.name == name)
                 return child
         }
         return null
     }
 
-    get isAnon(): boolean { return this.name.length==0 }
+    setAttribute(key:string | NSID, value:string) {
+        if(typeof "foo" === "string") {
+            this.attributes.set(new NSID(key as string), value)
+        } else {
+            this.attributes.set(key as NSID, value)
+        }
+    }
+
+    getAttribute(key:string | NSID): any {
+        return this.attributes.get(key instanceof NSID ? key : new NSID(key))
+    }
+
+
+    get name(): String { return this.nsid.name }
+
+    get namespace(): String { return this.nsid.namespace }
+
+    get isAnon(): boolean { return this.name.isEmpty() }
 
     value = () => this.values[0]
 
     toString = (prefix="") => {
-        let text = ""
+        let text = prefix
 
         if(this.name.length!=0) {
-            text += (prefix + ((this.namespace == "") ? this.name : `${this.namespace}:${this.name}`))
+            text += this.nsid
             if(!this.values.isEmpty() || this.attributes.size!=0) {
                 text +=" "
             }
@@ -63,13 +80,17 @@ export class Tag {
             }
         }
 
+        console.log(`Tag ${this.name} has prefix "${prefix}"`)
+
         if(this.children != null && !this.children.isEmpty()) {
-            let childPrefix = prefix + "  "
-            text = text + " {\n"
+            text += " {\n"
+
+            let childText = ""
             for(const child of this.children) {
-                text = text + child.toString(childPrefix) + "\n"
+                childText = childText + child.toString(prefix + "  ") + "\n"
             }
-            text += (prefix + "}")
+            childText = childText + prefix + "}"
+            text+=childText
         }
         return text
     }
