@@ -1,6 +1,7 @@
 import {KDInterp} from '../source/KDInterp'
 import {QA} from './QA'
 import {KD} from "../source/KD";
+import {log} from "../source/Log";
 
 let interp = new KDInterp()
 let qa = new QA("KD")
@@ -20,34 +21,43 @@ qa.equals(`foo:nugget 12 horses=2 cool=true url=http://cnn.com/`,
     interp.eval("foo:nugget 12 /* name=\`john\` */ horses= 2 cool = true url=http://cnn.com"))
 qa.equals(255, interp.eval("num 0xFF").value())
 
-qa.section("Lines combined with \\")
-qa.equals("Foo\nBar", interp.eval(`multiline \`
-    Foo
-    Bar
+qa.section("String block")
+qa.equals(" Foo\n Bar", interp.eval(`multiline \`
+     Foo
+     Bar
     \``).value())
+
+qa.section("String with \\ continuation")
+qa.equals("continue 1 2 3", interp.eval(`continue 1 2 \
+    3
+    `).toString())
+
+qa.section("Tags with children")
+let tag = interp.eval(`
+    Foo 1 2 
+    Bar 3 4 /* foo */ greet="hi" # foo
+    
+    fancy 5 6 url=https://www.nist.gov yellow=0xff00ff {
+    
+        child1 "hi"
+        child2 "foo" favcolors=[red, green] {
+            Hi test=true
+            
+        }
+    }
+    `)
 qa.equals(`root {
   Foo 1 2
   Bar 3 4 greet="hi"
   fancy 5 6 url=https://www.nist.gov/ yellow=16711935 {
     child1 "hi"
-    child2 "foo" favcolors=["red", "green"]
-    Hi test=true
+    child2 "foo" favcolors=["red", "green"] {
+      Hi test=true
+    }
   }
-}`, interp.eval(`
-    Foo 1 2 
-    Bar 3 4 /* foo */ greet="hi" # foo
-    /*
-    Parent {
-        Child say="hi"
-    }
-    */
-    fancy 5 6 url=https://www.nist.gov yellow=0xff00ff {
-        child1 "hi"
-        child2 "foo" favcolors=[red, green] {
-            Hi test=true
-        }
-    }
-    `).toString())
+}`, tag.toString())
+
+log(tag.getChild("fancy"))
 
 qa.section("Lists")
 

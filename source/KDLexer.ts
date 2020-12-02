@@ -25,6 +25,7 @@ export enum TokenKind {
     LineComment,
     BlockComment,
     Semicolon,
+    Backslash
 }
 
 export class KDLexer {
@@ -57,6 +58,7 @@ export class KDLexer {
         [true, /^]/g, TokenKind.RSquare],
         [true, /^\(/g, TokenKind.LParen],
         [true, /^\)/g, TokenKind.RParen],
+        [true, /^\\/g, TokenKind.Backslash],
 
         // URLs - We put this last because it's expensive
         [true,

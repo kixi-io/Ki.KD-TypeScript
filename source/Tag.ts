@@ -17,13 +17,13 @@ export class Tag {
 
     getChild(name: string): Tag {
         for (const child of this.children) {
-            if (child.nsid.name == name)
+            if (child.name == name)
                 return child
         }
         return null
     }
 
-    setAttribute(key:string | NSID, value:string) {
+    setAttribute(key:string | NSID, value:any) {
         if(typeof "foo" === "string") {
             this.attributes.set(new NSID(key as string), value)
         } else {
@@ -79,8 +79,6 @@ export class Tag {
                 i++
             }
         }
-
-        console.log(`Tag ${this.name} has prefix "${prefix}"`)
 
         if(this.children != null && !this.children.isEmpty()) {
             text += " {\n"
