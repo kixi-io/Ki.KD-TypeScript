@@ -76,7 +76,7 @@ export class KDInterp {
                 tag = new Tag(firstTok.text)
                 this.tokIndex += 1
             }
-        } else if(KDInterp.isLiteral(firstTok.kind) || firstTok.kind==TokenKind.LSquare) {
+        } else if(KDInterp.isSimpleLiteral(firstTok.kind) || firstTok.kind==TokenKind.LSquare) {
             anon = true
             tag = new Tag() // anonymous tag
         } else if(firstTok.kind==TokenKind.RBrace) {
@@ -92,7 +92,7 @@ export class KDInterp {
         return tag;
     }
 
-    private static isLiteral(kind: TokenKind) {
+    private static isSimpleLiteral(kind: TokenKind) {
         switch(kind) {
             case TokenKind.String:
             case TokenKind.Number:
@@ -132,12 +132,20 @@ export class KDInterp {
             if(this.indexIs(this.tokIndex+1, TokenKind.Equals)) {
                 // This is an attribute. Return now.
                 return;
-            } else if(tok.kind==TokenKind.LSquare) {
-                tag.values.add(this.parseList())
             } else {
-                tag.values.add(this.evalLiteral(tok))
-                this.tokIndex++
+                tag.values.add(this.readLiteral())
             }
+        }
+    }
+
+    private readLiteral() {
+        let tok = this.current
+
+        if(tok.kind==TokenKind.LSquare) {
+            return this.parseListOrMap()
+        } else {
+            this.tokIndex++
+            return this.evalLiteral(tok)
         }
     }
 
@@ -182,12 +190,7 @@ export class KDInterp {
                     equalsToken.pos.rowBegin)
             }
 
-            if(valueToken.kind==TokenKind.LSquare) {
-                tag.setAttribute(key, this.parseList())
-            } else {
-                tag.setAttribute(key, this.evalLiteral(valueToken))
-                this.tokIndex++
-            }
+            tag.setAttribute(key, this.readLiteral())
         }
     }
 
@@ -221,7 +224,9 @@ export class KDInterp {
 
     private peek(steps = 1): Token<TokenKind> { return this.tokens.safeGet(this.tokIndex+steps) }
 
-    private parseList() : List<any> {
+    // TODO: Maps
+    private parseListOrMap() : List<any> {
+
         let tok = this.current
         let list = listOf()
 
@@ -234,17 +239,13 @@ export class KDInterp {
         while(this.tokIndex<this.tokens.length) {
             this.skipNewLines()
             tok = this.current
-            if(tok.kind == TokenKind.LSquare) {
-                // start a sublist
-                list.add(this.parseList())
-            } else if(tok.kind == TokenKind.RSquare) {
+
+            if(tok.kind == TokenKind.RSquare) {
                 // move past the ]
                 this.tokIndex++
                 break;
             } else {
-                list.add(this.evalLiteral(tok))
-                // on to next element
-                this.tokIndex++
+                list.add(this.readLiteral())
             }
         }
 
