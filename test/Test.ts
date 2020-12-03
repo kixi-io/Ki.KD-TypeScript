@@ -61,6 +61,7 @@ log(tag.getChild("fancy"))
 
 qa.section("Lists")
 
+qa.equals(`[]`, KD.stringify(interp.eval("[]").value()))
 qa.equals(`[1, 2, 3]`, KD.stringify(interp.eval("nums [1,2,3]").value()))
 qa.equals(`[1, 2, 3]`, KD.stringify(interp.eval("nums [1 2 3]").value()))
 qa.equals(`[1, 2, [3]]`, KD.stringify(interp.eval("nums [1,2,[3]]").value()))
@@ -77,6 +78,13 @@ qa.equals(`["fee", "fi", "foe", "fum"]`, KD.stringify(interp.eval(`words [
         foe
         fum
     ]`).value()))
+
+qa.section("Maps")
+
+qa.equals("[=]", KD.stringify(interp.eval("[=]").value()))
+qa.equals(`["name"="Mika"]`, KD.stringify(interp.eval("user [name=`Mika`]").value()))
+qa.equals(`[5="num"]`, KD.stringify(interp.eval("user [5=`num`]").value()))
+qa.equals(`[[2, 3]="num"]`, KD.stringify(interp.eval("user [[2, 3]=`num`]").value()))
 
 qa.section("Anonymous Tags")
 qa.equals(`"Aloha"`, interp.eval(`"Aloha"`).toString())

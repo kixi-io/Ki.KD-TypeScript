@@ -129,23 +129,12 @@ export class KDInterp {
                 return;
             }
 
-            if(this.indexIs(this.tokIndex+1, TokenKind.Equals)) {
+            if((tok.kind == TokenKind.ID) && this.indexIs(this.tokIndex+1, TokenKind.Equals)) {
                 // This is an attribute. Return now.
                 return;
             } else {
                 tag.values.add(this.readLiteral())
             }
-        }
-    }
-
-    private readLiteral() {
-        let tok = this.current
-
-        if(tok.kind==TokenKind.LSquare) {
-            return this.parseListOrMap()
-        } else {
-            this.tokIndex++
-            return this.evalLiteral(tok)
         }
     }
 
@@ -224,9 +213,49 @@ export class KDInterp {
 
     private peek(steps = 1): Token<TokenKind> { return this.tokens.safeGet(this.tokIndex+steps) }
 
-    // TODO: Maps
-    private parseListOrMap() : List<any> {
+    private parseListOrMap() {
+        let tok = this.current
+        let list: List<any> = null
+        let mark = this.tokIndex
 
+        if(tok.kind!=TokenKind.LSquare)
+            throw new ParseError(`List must begin with a [, got「${TokenKind[tok.kind]}」`, tok.pos.columnEnd,
+                tok.pos.rowBegin)
+
+        this.tokIndex++
+
+        if(TokenKind.Equals == this.current?.kind) {
+            this.tokIndex = mark
+            return this.parseMap()
+        }
+
+        while(this.tokIndex<this.tokens.length) {
+            this.skipNewLines()
+            tok = this.current
+
+            if(tok.kind == TokenKind.RSquare) {
+                // move past the ]
+                this.tokIndex++
+                break;
+            } else {
+                let literal = this.readLiteral()
+
+                // @ts-ignore
+                if(TokenKind.Equals == this.current?.kind) {
+                    this.tokIndex = mark
+                    return this.parseMap()
+                } else {
+                    if(!list)
+                        list = listOf()
+                    list.add(literal)
+                }
+            }
+        }
+
+        return list ?? new List()
+    }
+
+    private parseList() : List<any> {
         let tok = this.current
         let list = listOf()
 
@@ -250,6 +279,88 @@ export class KDInterp {
         }
 
         return list
+    }
+
+    private parseMap() : Map<any, any> {
+        console.log("parseMap()")
+
+        let tok = this.current
+        let map = new Map()
+
+        if(tok.kind!=TokenKind.LSquare)
+            throw new ParseError(`Map must begin with a [, got「${TokenKind[tok.kind]}」`, tok.pos.columnEnd,
+                tok.pos.rowBegin)
+
+        this.tokIndex++
+
+        // Check for empty Map literal
+        if(TokenKind.Equals == this.current?.kind) {
+            this.tokIndex++
+
+            // @ts-ignore
+            if(TokenKind.RSquare == this.current?.kind) {
+                this.tokIndex++
+                return map
+            } else {
+                throw new ParseError(`Empty Map termination ']' expected but got「${TokenKind[tok.kind]}」`,
+                    tok.pos.columnEnd, tok.pos.rowBegin)
+            }
+        }
+
+        while(this.tokIndex<this.tokens.length) {
+            let keyToken = this.current
+
+            //  end of map
+            if(TokenKind.RSquare == keyToken?.kind) {
+                this.tokIndex++
+                break
+            }
+
+            if(!(KDInterp.isSimpleLiteral(keyToken.kind) || TokenKind.ID == keyToken?.kind ||
+                TokenKind.LSquare == keyToken?.kind)) {
+
+                throw new ParseError(`Expected literal for map key but got ${TokenKind[keyToken?.kind]}`,
+                    keyToken.pos.columnEnd, keyToken.pos.rowBegin)
+            }
+
+            let key = this.readLiteral()
+
+            let equalsToken = this.tokens.safeGet(this.tokIndex)
+
+            if(equalsToken == null) {
+                throw new ParseError(`Expected '=' after map key「${key}」but got EOL`,
+                    keyToken.pos.columnEnd, keyToken.pos.rowBegin)
+            } else if(equalsToken.kind != TokenKind.Equals) {
+                throw new ParseError(
+                    `Expected '=' after attribute key「${key}」but got ${TokenKind[equalsToken.kind]}`,
+                    keyToken.pos.columnEnd, keyToken.pos.rowBegin)
+            }
+
+            // move past ']'
+            this.tokIndex++
+
+            let valueToken = this.tokens.safeGet(this.tokIndex)
+
+            if(valueToken == null) {
+                throw new ParseError("Expected value for attribute value but got EOL", equalsToken.pos.columnEnd,
+                    equalsToken.pos.rowBegin)
+            }
+
+            map.set(key, this.readLiteral())
+        }
+
+        return map
+    }
+
+    private readLiteral() {
+        let tok = this.current
+
+        if(tok.kind==TokenKind.LSquare) {
+            return this.parseListOrMap()
+        } else {
+            this.tokIndex++
+            return this.evalLiteral(tok)
+        }
     }
 
     private static parseStringBlock(tok: Token<TokenKind>) {
