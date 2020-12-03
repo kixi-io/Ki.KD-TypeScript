@@ -39,7 +39,7 @@ let tag = interp.eval(`
     
     fancy 5 6 url=https://www.nist.gov yellow=0xff00ff {
     
-        child1 "hi"
+        child1 "hi" { "anon child" }
         child2 "foo" favcolors=[red, green] {
             Hi test=true
             
@@ -50,7 +50,9 @@ qa.equals(`root {
   Foo 1 2
   Bar 3 4 greet="hi"
   fancy 5 6 url=https://www.nist.gov/ yellow=16711935 {
-    child1 "hi"
+    child1 "hi" {
+      "anon child"
+    }
     child2 "foo" favcolors=["red", "green"] {
       Hi test=true
     }
