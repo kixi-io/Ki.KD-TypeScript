@@ -1,7 +1,7 @@
 import {log,info,error} from "../source/Log";
 
 /**
- * This class represents a simple testing framework.
+ * A simple testing framework.
  */
 export class QA {
 
@@ -43,6 +43,32 @@ export class QA {
             return true
         } else {
             error(`${modPrefix}Expected「${expected}」but got「${got}」: ❌`);
+            this.failed++
+            return false
+        }
+    }
+
+    isTrue(test: boolean, prefix = ""): boolean {
+        let modPrefix = prefix.isEmpty() ? "" : prefix + " "
+        if (test) {
+            info(`${modPrefix}true: ✔️`)
+            this.passed++
+            return true
+        } else {
+            error(`${modPrefix}false: ❌`);
+            this.failed++
+            return false
+        }
+    }
+
+    isFalse(test: boolean, prefix = ""): boolean {
+        let modPrefix = prefix.isEmpty() ? "" : prefix + " "
+        if (!test) {
+            info(`${modPrefix}false: ✔️`)
+            this.passed++
+            return true
+        } else {
+            error(`${modPrefix}true: ❌`);
             this.failed++
             return false
         }

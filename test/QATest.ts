@@ -1,12 +1,21 @@
-import {Quantity} from "../source/Quantity";
 import {QA} from './QA'
+import "../source/String+";
 
 let qa = new QA("QA")
 
+qa.section("Error handling")
+
 qa.throws(() => {
-    new Quantity(2, "")
+    throw new Error("Disaster!")
 }, "Empty unit")
 
 qa.doesntThrow(() => {
-    new Quantity(2, "a")
+    // no action
 }, `new Quantity(2, "a")`)
+
+qa.section("Booleans")
+
+qa.isTrue(true)
+qa.isFalse(false)
+
+qa.summarize()

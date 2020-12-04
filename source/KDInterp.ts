@@ -78,7 +78,6 @@ export class KDInterp {
                 this.tokIndex += 1
             }
         } else if(KDInterp.isSimpleLiteral(firstTok.kind) || firstTok.kind==TokenKind.LSquare) {
-            anon = true
             tag = new Tag() // anonymous tag
         } else if(firstTok.kind==TokenKind.RBrace) {
             return null
@@ -106,14 +105,6 @@ export class KDInterp {
 
         return false
     }
-
-    private isNewLine(): boolean {
-        let lastTok = this.tokens.safeGet(this.tokIndex-1)
-        return (this.tokIndex == 0 || lastTok==null || lastTok.kind == TokenKind.NL ||
-            lastTok.kind == TokenKind.Semicolon)
-    }
-
-    // TODO
 
     private indexIs(tokIndex: number, kind:TokenKind) {
         let tok = this.tokens.safeGet(tokIndex)
