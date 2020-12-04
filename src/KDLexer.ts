@@ -1,4 +1,4 @@
-import {buildLexer, Token} from './ts-parsec'
+import {buildLexer, Token} from './Lexer'
 import {listOf} from './KSL'
 import {ParseError} from "./ParseError";
 

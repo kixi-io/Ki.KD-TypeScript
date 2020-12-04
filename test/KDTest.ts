@@ -1,8 +1,8 @@
-import {KDInterp} from '../source/KDInterp'
+import {KDInterp} from '../src/KDInterp'
 import {QA} from './QA'
-import {KD} from "../source/KD";
-import {log} from "../source/Log";
-import {Quantity} from "../source/Quantity";
+import {KD} from "../src/KD";
+import {log} from "../src/Log";
+import {Quantity} from "../src/Quantity";
 
 let interp = new KDInterp()
 let qa = new QA("KD")

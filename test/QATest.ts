@@ -1,5 +1,5 @@
 import {QA} from './QA'
-import "../source/String+";
+import "../src/String+";
 
 let qa = new QA("QA")
 

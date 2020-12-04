@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "amd",
+    "target": "es6",
+    "outFile":"./build/kd.js",
+    "sourceRoot": "./src/",
+    "sourceMap": true
+  },
+  "exclude": ["node_modules", "test"]
+}

@@ -1,4 +1,4 @@
-import {log,info,error} from "../source/Log";
+import {log,info,error} from "../src/Log";
 
 /**
  * A simple testing framework.

@@ -1,7 +1,7 @@
 import {KDLexer, TokenKind} from './KDLexer'
 import {Tag} from './Tag';
 import {ParseError} from './ParseError'
-import {Token} from './ts-parsec';
+import {Token} from './Lexer';
 import {List, listOf} from "./List";
 import {Quantity} from "./Quantity";
 
