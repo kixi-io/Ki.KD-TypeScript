@@ -2,6 +2,7 @@ import {KDInterp} from '../source/KDInterp'
 import {QA} from './QA'
 import {KD} from "../source/KD";
 import {log} from "../source/Log";
+import {Quantity} from "../source/Quantity";
 
 let interp = new KDInterp()
 let qa = new QA("KD")
@@ -91,5 +92,17 @@ qa.equals(`[[2, 3]="num"]`, KD.stringify(interp.eval("user [[2, 3]=`num`]").valu
 qa.section("Anonymous Tags")
 qa.equals(`"Aloha"`, interp.eval(`"Aloha"`).toString())
 qa.equals(`"Aloha" 808 https://lemur.duke.edu/`, interp.eval(`"Aloha" 808 https://lemur.duke.edu`).toString())
+
+qa.section("Quantities")
+
+qa.equals(new Quantity(2, "vh"), Quantity.parse("2vh"))
+qa.throws(() => {
+    new Quantity(2, "")
+}, "Empty unit")
+
+qa.doesntThrow(() => {
+    new Quantity(2, "vh")
+}, `new Quantity(2, "vh")`)
+qa.equals(new Quantity(5, "px"), interp.eval("5px").value())
 
 qa.summarize()

@@ -1,5 +1,8 @@
 import {log,info,error} from "../source/Log";
 
+/**
+ * This class represents a simple testing framework.
+ */
 export class QA {
 
     static line = "―".repeat(38)
@@ -14,21 +17,75 @@ export class QA {
         this.name = name
     }
 
+    /**
+     * Create a new section of tests
+     */
     section(name: string, prefix='📐 ') {
         log()
         log(QA.padWithLine(prefix + name + ' '))
     }
 
-    equals(expected: any, got: any): boolean {
-        if (got == expected) {
-            info(`Equals「${expected}」: ✔️`)
+    /**
+     * This method uses the `equals` method on `expected` if available, otherwise uses `==`.
+     */
+    equals(expected: any, got: any, prefix = ""): boolean {
+        if(expected == null || got == null) {
+            return got == null && expected == null
+        }
+
+        let equals = (typeof expected.equals == "undefined") ? got == expected : expected.equals(got)
+
+        let modPrefix = prefix.isEmpty() ? "" : prefix + " "
+
+        if (equals) {
+            info(`${modPrefix}Equals「${expected}」: ✔️`)
             this.passed++
             return true
         } else {
-            error(`Expected「${expected}」but got「${got}」: ❌`);
+            error(`${modPrefix}Expected「${expected}」but got「${got}」: ❌`);
             this.failed++
             return false
         }
+    }
+
+    /**
+     * Checks if an error is thrown
+     */
+    throws(test: () => any, prefix = ""): boolean {
+
+        let modPrefix = prefix.isEmpty() ? "" : prefix + " "
+
+        try {
+            test()
+        }catch (e) {
+            info(`${modPrefix}Threw ${typeof e} ${e}`)
+            this.passed++
+            return true;
+        }
+
+        error(`${modPrefix}Didn't throw Error`)
+        this.failed++
+        return false;
+    }
+
+    /**
+     * Checks if an error is thrown
+     */
+    doesntThrow(test: () => any, prefix = ""): boolean {
+
+        let modPrefix = prefix.isEmpty() ? "" : prefix + " "
+
+        try {
+            test()
+        }catch (e) {
+            error(`${modPrefix}Threw ${typeof e} ${e}`)
+            this.failed++
+            return false;
+        }
+
+        info(`${modPrefix}Didn't throw Error`)
+        this.passed++
+        return true;
     }
 
     summarize() {

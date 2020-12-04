@@ -15,7 +15,9 @@ export class List<T> extends Array<T> {
     }
     isEmpty = () => this.length == 0
     slice = (start?: number, end?: number): List<T> => new List<T>(...super.slice(start, end))
-
+    contains(obj: T): boolean {
+        return this.indexOf(obj)!=-1
+    }
 
     shuffle() : List<T> {
         for (let i = this.length - 1; i > 0; i--) {

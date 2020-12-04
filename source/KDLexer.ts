@@ -11,6 +11,7 @@ export enum TokenKind {
     ID,
     nil,
     URL,
+    Quantity,
 
     LSquare, RSquare,
     LParen, RParen,
@@ -64,7 +65,7 @@ export class KDLexer {
         [true,
             /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi,
             TokenKind.URL],
-
+        [true, /^\d[\d_]*(\.\d+)?[-a-zA-Z][-a-zA-Z0-9]*/g, TokenKind.Quantity],
         // Comments
         // [false, /^(#|\/\/).*?$/g, TokenKind.LineComment],
         [false, /^(#|\/\/).*/g, TokenKind.LineComment],

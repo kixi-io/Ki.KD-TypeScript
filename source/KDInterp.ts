@@ -3,6 +3,7 @@ import {Tag} from './Tag';
 import {ParseError} from './ParseError'
 import {Token} from './ts-parsec';
 import {List, listOf} from "./List";
+import {Quantity} from "./Quantity";
 
 export class KDInterp {
 
@@ -97,8 +98,9 @@ export class KDInterp {
             case TokenKind.String:
             case TokenKind.Number:
             case TokenKind.Bool:
-            case TokenKind.URL:
             case TokenKind.nil:
+            case TokenKind.URL:
+            case TokenKind.Quantity:
                 return true
         }
 
@@ -359,7 +361,7 @@ export class KDInterp {
             return this.parseListOrMap()
         } else {
             this.tokIndex++
-            return this.evalLiteral(tok)
+            return KDInterp.evalLiteral(tok)
         }
     }
 
@@ -394,7 +396,7 @@ export class KDInterp {
         return lines.join("\n")
     }
 
-    private evalLiteral(tok: Token<TokenKind>) {
+    private static evalLiteral(tok: Token<TokenKind>) {
 
         switch(tok.kind) {
             case TokenKind.Number: { return +(tok.text.replace(/_/g, "")) }
@@ -405,6 +407,7 @@ export class KDInterp {
             case TokenKind.ID: { return tok.text } // bare string
             case TokenKind.nil: { return null }
             case TokenKind.URL: { return new URL(tok.text) }
+            case TokenKind.Quantity: { return Quantity.parse(tok.text) }
             default: {
                 throw new ParseError("Parse Error: Unknown token type for literal: " + TokenKind[tok.kind],
                     tok.pos.columnBegin, tok.pos.rowBegin)
