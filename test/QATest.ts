@@ -1,6 +1,10 @@
 import {QA} from './QA'
 import "../src/String+";
 
+/**
+ * Tests for the QA framework
+ */
+
 let qa = new QA("QA")
 
 qa.section("Error handling")

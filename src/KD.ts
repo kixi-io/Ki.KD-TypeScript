@@ -52,4 +52,16 @@ export class KD {
 
         return text
     }
+
+    static equals(first: any, second: any): boolean {
+
+        if(first == null || second == null) {
+            return second == null && first == null
+        }
+
+        let equals = (first.equals == undefined) ? second == first : first.equals(second)
+
+        return equals
+    }
 }
+

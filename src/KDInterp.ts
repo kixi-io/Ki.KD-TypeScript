@@ -4,6 +4,7 @@ import {ParseError} from './ParseError'
 import {Token} from './Lexer';
 import {List, listOf} from "./List";
 import {Quantity} from "./Quantity";
+import {KDate} from "./KDate";
 
 export class KDInterp {
 
@@ -55,8 +56,6 @@ export class KDInterp {
         let firstTok = this.current
 
         let tag: Tag
-        let anon = false
-
         if(firstTok.kind == TokenKind.ID) {
             let secondTok = this.tokens.safeGet(this.tokIndex + 1)
             if(secondTok==null) {
@@ -100,6 +99,7 @@ export class KDInterp {
             case TokenKind.nil:
             case TokenKind.URL:
             case TokenKind.Quantity:
+            case TokenKind.Date:
                 return true
         }
 
@@ -248,6 +248,7 @@ export class KDInterp {
         return list ?? new List()
     }
 
+    /*
     private parseList() : List<any> {
         let tok = this.current
         let list = listOf()
@@ -273,10 +274,9 @@ export class KDInterp {
 
         return list
     }
+    */
 
     private parseMap() : Map<any, any> {
-        console.log("parseMap()")
-
         let tok = this.current
         let map = new Map()
 
@@ -399,6 +399,7 @@ export class KDInterp {
             case TokenKind.nil: { return null }
             case TokenKind.URL: { return new URL(tok.text) }
             case TokenKind.Quantity: { return Quantity.parse(tok.text) }
+            case TokenKind.Date: { return KDate.parse(tok.text.replace('/', '-'))}
             default: {
                 throw new ParseError("Parse Error: Unknown token type for literal: " + TokenKind[tok.kind],
                     tok.pos.columnBegin, tok.pos.rowBegin)

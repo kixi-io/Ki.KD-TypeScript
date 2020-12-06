@@ -1,4 +1,5 @@
 import {log,info,error} from "../src/Log";
+import {KD} from "../src/KD";
 
 /**
  * A simple testing framework.
@@ -33,7 +34,7 @@ export class QA {
             return got == null && expected == null
         }
 
-        let equals = (typeof expected.equals == "undefined") ? got == expected : expected.equals(got)
+        let equals = KD.equals(expected, got)
 
         let modPrefix = prefix.isEmpty() ? "" : prefix + " "
 

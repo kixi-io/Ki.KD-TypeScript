@@ -12,6 +12,7 @@ export enum TokenKind {
     nil,
     URL,
     Quantity,
+    Date,
 
     LSquare, RSquare,
     LParen, RParen,
@@ -35,7 +36,7 @@ export class KDLexer {
 
     static tokenizer = buildLexer([
         [true, /^0x[0-9A-Fa-f]+/g, TokenKind.HexNumber],
-        // [true, /^\d+(\.\d+)?/g, TokenKind.Number],
+        [true, /^(\d+-\d+-\d+)|(\d+\/\d+\/\d+)/g, TokenKind.Date],
         [true, /^\d[\d_]*(\.\d+)?/g, TokenKind.Number],
         [true, /^"([^\\"]|\\")*"/g, TokenKind.String],
         [true, /^`([^\\`]|\\`)*`/g, TokenKind.StringBlock],

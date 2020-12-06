@@ -35,7 +35,6 @@ export class Tag {
         return this.attributes.get(key instanceof NSID ? key : new NSID(key))
     }
 
-
     get name(): String { return this.nsid.name }
 
     get namespace(): String { return this.nsid.namespace }
@@ -43,6 +42,10 @@ export class Tag {
     get isAnon(): boolean { return this.name.isEmpty() }
 
     value = () => this.values[0]
+
+    equals(tag: Tag) : boolean {
+        return tag!=null && tag.toString() == this.toString()
+    }
 
     toString = (prefix="") => {
         let text = prefix
@@ -92,4 +95,5 @@ export class Tag {
         }
         return text
     }
+
 }

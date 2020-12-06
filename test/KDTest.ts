@@ -3,6 +3,8 @@ import {QA} from './QA'
 import {KD} from "../src/KD";
 import {log} from "../src/Log";
 import {Quantity} from "../src/Quantity";
+import {listOf} from "../src/List";
+import {KDate} from "../src/KDate";
 
 let interp = new KDInterp()
 let qa = new QA("KD")
@@ -27,6 +29,17 @@ qa.equals(" Foo\n Bar", interp.eval(`multiline \`
      Foo
      Bar
     \``).value())
+
+qa.section("Anonymous Tags")
+qa.equals("Hola", interp.eval(`"Hola"`).value())
+qa.equals(listOf("Hola", "Alejandro"), interp.eval(`"Hola" "Alejandro"`).values)
+qa.equals(listOf(interp.eval('"Bula"'), interp.eval('"Aloha"'), interp.eval('"Hola"')), interp.eval(`
+    greetings {
+        "Bula"
+        "Aloha"
+        "Hola"
+    }
+    `).children)
 
 qa.section("String with \\ continuation")
 qa.equals("continue 1 2 3", interp.eval(`continue 1 2 \
@@ -61,6 +74,11 @@ qa.equals(`root {
 }`, tag.toString())
 
 log(tag.getChild("fancy"))
+
+qa.section("Dates")
+qa.equals(KDate.parse("2020/5/11"), interp.eval("2020/5/11").value())
+// ISO version
+qa.equals(KDate.parse("2020-5-11"), interp.eval("2020-5-11").value())
 
 qa.section("Lists")
 
