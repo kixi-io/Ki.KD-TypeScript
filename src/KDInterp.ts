@@ -5,6 +5,8 @@ import {Token} from './Lexer';
 import {List, listOf} from "./List";
 import {Quantity} from "./Quantity";
 import {KDate} from "./KDate";
+import {Call} from "./Call";
+import {NSID} from "./NSID";
 
 export class KDInterp {
 
@@ -54,9 +56,10 @@ export class KDInterp {
             return null
 
         let firstTok = this.current
+        let next = this.peek()
 
         let tag: Tag
-        if(firstTok.kind == TokenKind.ID) {
+        if(firstTok.kind == TokenKind.ID && !(next && next.kind == TokenKind.LParen)) {
             let secondTok = this.tokens.safeGet(this.tokIndex + 1)
             if(secondTok==null) {
                 return new Tag(firstTok.text)
@@ -83,8 +86,8 @@ export class KDInterp {
         }
 
         if(tag) {
-            this.parseValues(tag)
-            this.parseAttributes(tag)
+            this.parseValues(tag.values)
+            this.parseAttributes(tag.attributes)
             this.parseChildren(tag)
         }
 
@@ -94,6 +97,7 @@ export class KDInterp {
     private static isSimpleLiteral(kind: TokenKind) {
         switch(kind) {
             case TokenKind.String:
+            case TokenKind.ID:
             case TokenKind.Number:
             case TokenKind.Bool:
             case TokenKind.nil:
@@ -111,12 +115,13 @@ export class KDInterp {
         return tok && tok.kind == kind
     }
 
-    private parseValues(tag: Tag) {
+    private parseValues(values: List<any>) {
         while(this.tokIndex<this.tokens.length) {
             let tok = this.current
 
             let last = this.peek(-1)
-            if(tok.kind == TokenKind.NL && (last && last.kind!=TokenKind.Backslash) || tok.kind == TokenKind.Semicolon) {
+            if(tok.kind == TokenKind.NL && (last && last.kind!=TokenKind.Backslash) || tok.kind == TokenKind.Semicolon
+                || tok.kind == TokenKind.RParen) {
                 return;
             } else if(tok.kind == TokenKind.LBrace || tok.kind == TokenKind.RBrace) {
                 return;
@@ -126,18 +131,17 @@ export class KDInterp {
                 // This is an attribute. Return now.
                 return;
             } else {
-                tag.values.add(this.readLiteral())
+                values.add(this.readLiteral())
             }
         }
     }
 
-    private parseAttributes(tag: Tag) {
-
+    private parseAttributes(atts: Map<string, any> | Map<NSID, any>) {
         while(this.tokIndex<this.tokens.length) {
 
             let keyToken = this.current
 
-            if(keyToken.kind == TokenKind.NL || keyToken.kind == TokenKind.Semicolon) {
+            if(keyToken.kind == TokenKind.NL || keyToken.kind == TokenKind.Semicolon || keyToken.kind == TokenKind.RParen) {
                 return
             } else if(keyToken.kind == TokenKind.LBrace || keyToken.kind == TokenKind.RBrace ) {
                 return
@@ -172,7 +176,11 @@ export class KDInterp {
                     equalsToken.pos.rowBegin)
             }
 
-            tag.setAttribute(key, this.readLiteral())
+            if(atts.keys.name == "string") {
+                (atts as Map<string,any>).set(key, this.readLiteral())
+            } else {
+                (atts as Map<NSID,any>).set(new NSID(key), this.readLiteral())
+            }
         }
     }
 
@@ -246,6 +254,48 @@ export class KDInterp {
         }
 
         return list ?? new List()
+    }
+
+    private parseCall(): Call {
+
+        let tok = this.current
+        if(tok.kind != TokenKind.ID) {
+            throw new ParseError("Call type must be an identifier.", tok.pos.columnBegin, tok.pos.rowBegin)
+        }
+        let name = tok.text
+        this.tokIndex++
+
+        tok = this.current
+        if(!tok) {
+            let last = this.peek(-1)
+            throw new ParseError("Unexpected EOF in Call", last.pos.columnBegin, last.pos.rowBegin)
+        } else if(tok.kind != TokenKind.LParen) {
+            throw new ParseError(`Expected ( after ID in Call but got「${tok.text}」`,
+                tok.pos.columnBegin, tok.pos.rowBegin)
+        }
+
+        this.tokIndex++
+        tok = this.current
+
+        if(!tok) {
+            throw new ParseError("Unexpected EOF in Call", tok.pos.columnBegin, tok.pos.rowBegin)
+        }
+
+        let call = new Call(name)
+        this.parseValues(call.values)
+        this.parseAttributes(call.attributes)
+
+        tok = this.current
+        if(!tok) {
+            let last = this.peek(-1)
+            throw new ParseError("Expected ) at end of call, but got EOF",
+                last.pos.columnBegin, last.pos.rowBegin)
+        } else if(tok.kind != TokenKind.RParen) {
+            throw new ParseError(`Expected ) at end of Call literal but got「${tok.text}」`,
+                tok.pos.columnBegin, tok.pos.rowBegin)
+        }
+        this.tokIndex++
+        return call
     }
 
     /*
@@ -347,9 +397,12 @@ export class KDInterp {
 
     private readLiteral() {
         let tok = this.current
+        let next = this.peek()
 
         if(tok.kind==TokenKind.LSquare) {
             return this.parseListOrMap()
+        } else if(TokenKind.ID == tok.kind && next && TokenKind.LParen == next.kind) {
+            return this.parseCall()
         } else {
             this.tokIndex++
             return KDInterp.evalLiteral(tok)

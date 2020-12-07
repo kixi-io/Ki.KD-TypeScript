@@ -111,12 +111,28 @@ qa.section("Anonymous Tags")
 qa.equals(`"Aloha"`, interp.eval(`"Aloha"`).toString())
 qa.equals(`"Aloha" 808 https://lemur.duke.edu/`, interp.eval(`"Aloha" 808 https://lemur.duke.edu`).toString())
 
+qa.section("Calls")
+qa.equals("color()", "" + interp.eval("foo color()").value())
+qa.equals("num(1)", "" + interp.eval("foo num(1)").value())
+qa.equals("rgb(1, 2, 3)", "" + interp.eval("foo rgb(1, 2, 3)").value())
+// no commas
+qa.equals("rgb(1, 2, 3)", "" + interp.eval("foo rgb(1 2 3)").value())
+qa.equals("rgb(1, 2, 3, a=1)", "" + interp.eval("foo rgb(1 2 3 a=1)").value())
+// anonymous tag with Call value
+qa.equals("rgb(1, 2, 3)", "" + interp.eval("rgb(1, 2, 3)").value())
+
 qa.section("Quantities")
 
+Quantity.registerUnits("vh", "px")
 qa.equals(new Quantity(2, "vh"), Quantity.parse("2vh"))
+
 qa.throws(() => {
     new Quantity(2, "")
 }, "Empty unit")
+
+qa.throws(() => {
+    new Quantity(2, "eon")
+}, "「eon」is not a registered unit.")
 
 qa.doesntThrow(() => {
     new Quantity(2, "vh")
