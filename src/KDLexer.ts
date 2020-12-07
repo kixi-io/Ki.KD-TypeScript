@@ -1,5 +1,5 @@
 import {buildLexer, Token} from './Lexer'
-import {listOf} from './KSL'
+import {listOf} from './index'
 import {ParseError} from "./ParseError";
 
 export enum TokenKind {
@@ -34,7 +34,7 @@ export class KDLexer {
 
     tokens = listOf<Token<TokenKind>>();
 
-    static tokenizer = buildLexer([
+    static tokenizer = buildLexer<TokenKind>([
         [true, /^0x[0-9A-Fa-f]+/g, TokenKind.HexNumber],
         [true, /^(\d+-\d+-\d+)|(\d+\/\d+\/\d+)/g, TokenKind.Date],
         [true, /^\d[\d_]*(\.\d+)?/g, TokenKind.Number],
@@ -75,29 +75,25 @@ export class KDLexer {
     ]);
 
     constructor(text: string) {
-        let token: Token<TokenKind>
         try {
-            token = KDLexer.tokenizer.parse(text)
+            let token = KDLexer.tokenizer.parse(text)
+            if(!token) {
+                // empty line
+                return
+            }
+
+            while(true) {
+                /*
+                if(token.kind == TokenKind.NL) log("(NL)")
+                else log(`${token.text} (${TokenKind[token.kind]})`)
+                */
+                this.tokens.add(token)
+
+                token = token.next
+                if(!token) break
+            }
         } catch(e) {
             throw new ParseError(e.message ?? "Error")
-        }
-
-        if(!token) {
-            // empty line
-            return
-        }
-
-        while(true) {
-            /*
-            if(token.kind == TokenKind.NL) log("(NL)")
-            else log(`${token.text} (${TokenKind[token.kind]})`)
-            */
-
-
-            this.tokens.add(token)
-
-            token = token.next
-            if(!token) break
         }
     }
 }

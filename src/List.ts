@@ -2,10 +2,10 @@ import {rand} from './KMath';
 
 export class List<T> extends Array<T> {
 
-    constructor(...obj) { super(...obj) }
+    constructor(...obj: any) { super(...obj) }
 
     random = () : T => this[rand(0, this.length-1)]
-    remove= (obj) => this.splice(this.findIndex(e => e == obj), 1)
+    remove= (obj: T) => this.splice(this.findIndex(e => e == obj), 1)
     removeAt = (index: number) => this.splice(index, 1)
     add = (obj: T) => this.push(obj)
     addAll(...objs: Array<T>) {
@@ -31,7 +31,7 @@ export class List<T> extends Array<T> {
      * Gets the value at the index or `null` if its out of range.
      * @param index
      */
-    safeGet(index: number) : T {
+    safeGet(index: number) : T | null {
         if(index>=this.length) {
             return null
         }
@@ -40,4 +40,4 @@ export class List<T> extends Array<T> {
     }
 }
 
-export let listOf = <T>(...objs) => new List<T>(...objs)
+export let listOf = <T>(...objs: any) => new List<T>(...objs)

@@ -1,6 +1,6 @@
 
 export class KD {
-    static stringify(it) {
+    static stringify(it: any): string {
         if (it == null) {
             return "nil";
         }
@@ -16,7 +16,7 @@ export class KD {
         return it.toString();
     }
 
-    private static stringifyArray(list: Array<any>) {
+    private static stringifyArray(list: Array<any>): string {
         let text ="["
 
         let index = 0
@@ -33,7 +33,7 @@ export class KD {
         return text
     }
 
-    private static stringifyMap(map: Map<any, any>) {
+    private static stringifyMap(map: Map<any, any>): string {
         if(map.size==0)
             return "[=]"
 
@@ -54,14 +54,11 @@ export class KD {
     }
 
     static equals(first: any, second: any): boolean {
-
         if(first == null || second == null) {
             return second == null && first == null
         }
 
-        let equals = (first.equals == undefined) ? second == first : first.equals(second)
-
-        return equals
+        return (first.equals == undefined) ? second == first : first.equals(second)
     }
 }
 

@@ -10,9 +10,9 @@ import {NSID} from "./NSID";
 
 export class KDInterp {
 
-    tokIndex: number
-    tokens: List<Token<TokenKind>>
-    tags: List<Tag>
+    tokIndex: number = 0
+    tokens: List<Token<TokenKind>> = listOf()
+    tags: List<Tag> = listOf()
 
     eval(text: string): Tag {
         this.tokIndex = 0
@@ -22,7 +22,7 @@ export class KDInterp {
         this.tokens = lexer.tokens
         if (this.tokens.length == 0) return new Tag("root")
 
-        let tag: Tag
+        let tag: Tag | null
         while ((tag = this.parseTag()) != null) {
             this.tags.add(tag)
         }
@@ -49,7 +49,7 @@ export class KDInterp {
         }
     }
 
-    private parseTag(): Tag {
+    private parseTag(): Tag | null {
         this.skipNewLines()
 
         if(this.tokIndex>=this.tokens.length)
@@ -58,7 +58,7 @@ export class KDInterp {
         let firstTok = this.current
         let next = this.peek()
 
-        let tag: Tag
+        let tag: Tag | null = null
         if(firstTok.kind == TokenKind.ID && !(next && next.kind == TokenKind.LParen)) {
             let secondTok = this.tokens.safeGet(this.tokIndex + 1)
             if(secondTok==null) {
@@ -188,7 +188,7 @@ export class KDInterp {
         let tok = this.current
         if(tok && tok.kind == TokenKind.LBrace) {
             this.tokIndex++
-            let child: Tag
+            let child: Tag | null = null
 
             while ((child = this.parseTag()) != null) {
                 tag.children.add(child)
@@ -212,11 +212,13 @@ export class KDInterp {
 
     private get current(): Token<TokenKind> { return this.tokens[this.tokIndex] }
 
-    private peek(steps = 1): Token<TokenKind> { return this.tokens.safeGet(this.tokIndex+steps) }
+    private peek(steps = 1): Token<TokenKind> | null {
+        return this.tokens.safeGet(this.tokIndex+steps)
+    }
 
     private parseListOrMap() {
         let tok = this.current
-        let list: List<any> = null
+        let list: List<any> | null = null
         let mark = this.tokIndex
 
         if(tok.kind!=TokenKind.LSquare)
@@ -268,8 +270,9 @@ export class KDInterp {
         tok = this.current
         if(!tok) {
             let last = this.peek(-1)
-            throw new ParseError("Unexpected EOF in Call", last.pos.columnBegin, last.pos.rowBegin)
-        } else if(tok.kind != TokenKind.LParen) {
+            throw new ParseError("Unexpected EOF in Call", last?.pos.columnBegin ?? -1,
+                last?.pos.rowBegin ?? -1)
+        } else if(tok.kind !== TokenKind.LParen) {
             throw new ParseError(`Expected ( after ID in Call but got「${tok.text}」`,
                 tok.pos.columnBegin, tok.pos.rowBegin)
         }
@@ -277,8 +280,10 @@ export class KDInterp {
         this.tokIndex++
         tok = this.current
 
+        let last = this.peek(-1)
         if(!tok) {
-            throw new ParseError("Unexpected EOF in Call", tok.pos.columnBegin, tok.pos.rowBegin)
+            throw new ParseError("Unexpected EOF in Call", last?.pos.columnBegin ?? -1,
+                last?.pos.rowBegin ?? -1)
         }
 
         let call = new Call(name)
@@ -289,7 +294,7 @@ export class KDInterp {
         if(!tok) {
             let last = this.peek(-1)
             throw new ParseError("Expected ) at end of call, but got EOF",
-                last.pos.columnBegin, last.pos.rowBegin)
+                last?.pos.columnBegin ?? -1, last?.pos.rowBegin ?? -1)
         } else if(tok.kind != TokenKind.RParen) {
             throw new ParseError(`Expected ) at end of Call literal but got「${tok.text}」`,
                 tok.pos.columnBegin, tok.pos.rowBegin)

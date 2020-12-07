@@ -1,4 +1,4 @@
-import {List, listOf} from './KSL'
+import {List, listOf} from './List'
 import {KD} from './KD'
 import {NSID} from './NSID'
 import './String+'
@@ -15,7 +15,7 @@ export class Tag {
         this.nsid = new NSID(name, namespace)
     }
 
-    getChild(name: string): Tag {
+    getChild(name: string): Tag | null {
         for (const child of this.children) {
             if (child.name == name)
                 return child

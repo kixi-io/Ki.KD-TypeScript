@@ -7,27 +7,27 @@
  * Logs zero or more objects to the console. If no arguments are provided
  * a blank line is logged.
  */
-export var log = (...objs) => out(console.log, "", ...objs);
+export let log = (...objs: any) => out(console.log, "", ...objs);
 
 /**
  * Sends zero or more objects to console.error. If no arguments are provided
  * a blank line is logged.
  */
-export var error = (...objs) => out(console.log, "🟥 ", ...objs)
+export let error = (...objs: any) => out(console.log, "🟥 ", ...objs)
 
 /**
  * Sends zero or more objects to console.error. If no arguments are provided
  * a blank line is logged.
  */
-export var info = (...objs) => out(console.log,"🟩 ", ...objs)
+export let info = (...objs: any) => out(console.log,"🟩 ", ...objs)
 
 /**
  * Sends zero or more objects to console.warn. If no arguments are provided
  * a blank line is logged.
  */
-export var warn = (...objs) => out(console.log, "🟧 ", ...objs)
+export let warn = (...objs: any) => out(console.log, "🟧 ", ...objs)
 
-function out(writer, prefix, ...objs) {
+function out(writer: Function, prefix: string, ...objs: any) {
 
     var line;
 
@@ -51,7 +51,7 @@ function out(writer, prefix, ...objs) {
     return line
 }
 
-function stringify(obj): string {
+function stringify(obj: any): string {
     if(obj instanceof Array)
         return stringifyArray(obj)
     else
