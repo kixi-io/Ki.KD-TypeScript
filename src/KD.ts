@@ -34,7 +34,7 @@ export class KD {
     }
 
     private static stringifyMap(map: Map<any, any>): string {
-        if(map.size==0)
+        if(map.size===0)
             return "[=]"
 
         let text ="["
@@ -58,7 +58,7 @@ export class KD {
             return second == null && first == null
         }
 
-        return (first.equals == undefined) ? second == first : first.equals(second)
+        return (first.equals === undefined) ? second === first : first.equals(second)
     }
 }
 

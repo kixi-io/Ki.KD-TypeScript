@@ -1,5 +1,5 @@
 import {buildLexer, Token} from './Lexer'
-import {listOf} from './index'
+import {listOf} from './List'
 import {ParseError} from "./ParseError";
 
 export enum TokenKind {
@@ -44,7 +44,7 @@ export class KDLexer {
         [true, /^nil/g, TokenKind.nil],
 
         // TODO: Support unicode letters, numbers and emoji
-        [true, /^[a-zA-Z_.][\w._]*/g, TokenKind.ID],
+        [true, /^[a-zA-Z_.][\w._-]*/g, TokenKind.ID],
 
         [false, /^[\t\r ]+/g, TokenKind.Space],
 

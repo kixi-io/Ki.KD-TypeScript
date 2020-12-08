@@ -17,7 +17,7 @@ export class Tag {
 
     getChild(name: string): Tag | null {
         for (const child of this.children) {
-            if (child.name == name)
+            if (child.name === name)
                 return child
         }
         return null
@@ -44,15 +44,15 @@ export class Tag {
     value = () => this.values[0]
 
     equals(tag: Tag) : boolean {
-        return tag!=null && tag.toString() == this.toString()
+        return tag!=null && tag.toString() === this.toString()
     }
 
     toString = (prefix="") => {
         let text = prefix
 
-        if(this.name.length!=0) {
+        if(this.name.length!==0) {
             text += this.nsid
-            if(!this.values.isEmpty() || this.attributes.size!=0) {
+            if(!this.values.isEmpty() || this.attributes.size!==0) {
                 text +=" "
             }
         }
@@ -67,7 +67,7 @@ export class Tag {
                 i++
             }
 
-            if(this.attributes.size!=0) {
+            if(this.attributes.size!==0) {
                 text +=" "
             }
         }

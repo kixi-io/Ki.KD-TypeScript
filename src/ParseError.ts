@@ -11,9 +11,9 @@ export class ParseError extends Error {
     }
 
     static formatMessage(message: string, line: number, position: number) {
-        if(line==-1 && position==-1) {
+        if(line===-1 && position===-1) {
             return message
-        } else if(line==-1) {
+        } else if(line===-1) {
             return `Parse error at position ${position}, ${message}`
         }
         return `Parse error at line ${line} position ${position}, ${message}`

@@ -13,16 +13,16 @@ qa.section("Basic")
 qa.equals(`foo 12 "bill" "hi" true false nil`, interp.eval("foo 12 bill `hi` true false nil").toString())
 qa.equals(`foo:nugget 12000 "bill" "hi" true false nil`,
     interp.eval("foo:nugget 12_000 bill `hi` true false nil").toString())
+qa.equals(255, interp.eval("num 0xFF").value())
 
 qa.section("Comments")
 
 qa.equals(`foo:nugget 12 name="john" horses=2 cool=true url=http://cnn.com/`,
-    interp.eval(`foo:nugget 12 name=\`john\` horses= 2 cool = true url=http://cnn.com // comment`))
+    interp.eval(`foo:nugget 12 name=\`john\` horses= 2 cool = true url=http://cnn.com // comment`).toString())
 qa.equals(`foo:nugget 12 name="john" horses=2 cool=true url=http://cnn.com/`,
-    interp.eval(`foo:nugget 12 name=\`john\` horses= 2 cool = true url=http://cnn.com # comment`))
+    interp.eval(`foo:nugget 12 name=\`john\` horses= 2 cool = true url=http://cnn.com # comment`).toString())
 qa.equals(`foo:nugget 12 horses=2 cool=true url=http://cnn.com/`,
-    interp.eval("foo:nugget 12 /* name=\`john\` */ horses= 2 cool = true url=http://cnn.com"))
-qa.equals(255, interp.eval("num 0xFF").value())
+    interp.eval("foo:nugget 12 /* name=\`john\` */ horses= 2 cool = true url=http://cnn.com").toString())
 
 qa.section("String block")
 qa.equals(" Foo\n Bar", interp.eval(`multiline \`

@@ -20,7 +20,7 @@ export class KDInterp {
 
         let lexer = new KDLexer(text)
         this.tokens = lexer.tokens
-        if (this.tokens.length == 0) return new Tag("root")
+        if (this.tokens.length === 0) return new Tag("root")
 
         let tag: Tag | null
         while ((tag = this.parseTag()) != null) {
@@ -29,7 +29,7 @@ export class KDInterp {
 
         if (this.tags.isEmpty()) {
             return new Tag("root")
-        } else if (this.tags.length == 1) {
+        } else if (this.tags.length === 1) {
             return this.tags[0]
         }
 
@@ -41,7 +41,7 @@ export class KDInterp {
 
     private skipNewLines() {
         while(this.tokIndex<this.tokens.length) {
-            if(this.tokens[this.tokIndex].kind != TokenKind.NL) {
+            if(this.tokens[this.tokIndex].kind !== TokenKind.NL) {
                 return;
             }
 
@@ -59,17 +59,17 @@ export class KDInterp {
         let next = this.peek()
 
         let tag: Tag | null = null
-        if(firstTok.kind == TokenKind.ID && !(next && next.kind == TokenKind.LParen)) {
+        if(firstTok.kind === TokenKind.ID && !(next && next.kind === TokenKind.LParen)) {
             let secondTok = this.tokens.safeGet(this.tokIndex + 1)
             if(secondTok==null) {
                 return new Tag(firstTok.text)
-            } else if(secondTok.kind == TokenKind.Colon) {
+            } else if(secondTok.kind === TokenKind.Colon) {
                 // name & namespace
                 let thirdTok = this.tokens.safeGet(this.tokIndex + 2)
                 if(thirdTok==null) {
                     throw new ParseError(`Expected ID for name after namespace: but got EOL`,
                         secondTok.pos.columnEnd, secondTok.pos.rowEnd)
-                } else if(thirdTok.kind!=TokenKind.ID) {
+                } else if(thirdTok.kind!==TokenKind.ID) {
                     throw new ParseError(`Expected ID for name after namespace: but got ` +
                         `${TokenKind[thirdTok.kind]}`, thirdTok.pos.columnBegin, thirdTok.pos.rowBegin)
                 }
@@ -79,9 +79,9 @@ export class KDInterp {
                 tag = new Tag(firstTok.text)
                 this.tokIndex += 1
             }
-        } else if(KDInterp.isSimpleLiteral(firstTok.kind) || firstTok.kind==TokenKind.LSquare) {
+        } else if(KDInterp.isSimpleLiteral(firstTok.kind) || firstTok.kind===TokenKind.LSquare) {
             tag = new Tag() // anonymous tag
-        } else if(firstTok.kind==TokenKind.RBrace) {
+        } else if(firstTok.kind===TokenKind.RBrace) {
             return null
         }
 
@@ -112,7 +112,7 @@ export class KDInterp {
 
     private indexIs(tokIndex: number, kind:TokenKind) {
         let tok = this.tokens.safeGet(tokIndex)
-        return tok && tok.kind == kind
+        return tok && tok.kind === kind
     }
 
     private parseValues(values: List<any>) {
@@ -120,16 +120,17 @@ export class KDInterp {
             let tok = this.current
 
             let last = this.peek(-1)
-            if(tok.kind == TokenKind.NL && (last && last.kind!=TokenKind.Backslash) || tok.kind == TokenKind.Semicolon
-                || tok.kind == TokenKind.RParen) {
-                return;
-            } else if(tok.kind == TokenKind.LBrace || tok.kind == TokenKind.RBrace) {
-                return;
+            if(tok.kind === TokenKind.NL && (last==null || last.kind!==TokenKind.Backslash)) {
+                return
+            } else if(tok.kind === TokenKind.Semicolon || tok.kind === TokenKind.RParen) {
+                return
+            } else if(tok.kind === TokenKind.LBrace || tok.kind === TokenKind.RBrace) {
+                return
             }
 
-            if((tok.kind == TokenKind.ID) && this.indexIs(this.tokIndex+1, TokenKind.Equals)) {
+            if((tok.kind === TokenKind.ID) && this.indexIs(this.tokIndex+1, TokenKind.Equals)) {
                 // This is an attribute. Return now.
-                return;
+                return
             } else {
                 values.add(this.readLiteral())
             }
@@ -141,13 +142,13 @@ export class KDInterp {
 
             let keyToken = this.current
 
-            if(keyToken.kind == TokenKind.NL || keyToken.kind == TokenKind.Semicolon || keyToken.kind == TokenKind.RParen) {
+            if(keyToken.kind === TokenKind.NL || keyToken.kind === TokenKind.Semicolon || keyToken.kind === TokenKind.RParen) {
                 return
-            } else if(keyToken.kind == TokenKind.LBrace || keyToken.kind == TokenKind.RBrace ) {
+            } else if(keyToken.kind === TokenKind.LBrace || keyToken.kind === TokenKind.RBrace ) {
                 return
             }
 
-            if(keyToken.kind!=TokenKind.ID) {
+            if(keyToken.kind!==TokenKind.ID) {
                 throw new ParseError(`Expected ID for attribute key but got ${TokenKind[keyToken.kind]}`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
             }
@@ -161,7 +162,7 @@ export class KDInterp {
             if(equalsToken == null) {
                 throw new ParseError(`Expected '=' after attribute key "${key}" but got EOL`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
-            } else if(equalsToken.kind != TokenKind.Equals) {
+            } else if(equalsToken.kind !== TokenKind.Equals) {
                 throw new ParseError(
                     `Expected '=' after attribute key "${key}" but got ${TokenKind[equalsToken.kind]}`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
@@ -176,7 +177,7 @@ export class KDInterp {
                     equalsToken.pos.rowBegin)
             }
 
-            if(atts.keys.name == "string") {
+            if(atts.keys.name === "string") {
                 (atts as Map<string,any>).set(key, this.readLiteral())
             } else {
                 (atts as Map<NSID,any>).set(new NSID(key), this.readLiteral())
@@ -186,7 +187,7 @@ export class KDInterp {
 
     private parseChildren(tag: Tag) {
         let tok = this.current
-        if(tok && tok.kind == TokenKind.LBrace) {
+        if(tok && tok.kind === TokenKind.LBrace) {
             this.tokIndex++
             let child: Tag | null = null
 
@@ -194,7 +195,7 @@ export class KDInterp {
                 tag.children.add(child)
                 this.skipNewLines()
                 tok = this.current;
-                if(tok.kind==TokenKind.RBrace) {
+                if(tok.kind===TokenKind.RBrace) {
                     break
                 }
             }
@@ -202,7 +203,7 @@ export class KDInterp {
             this.skipNewLines()
 
             tok = this.current
-            if(tok && tok.kind==TokenKind.RBrace) {
+            if(tok && tok.kind===TokenKind.RBrace) {
                 this.tokIndex++
                 return
             }
@@ -221,13 +222,13 @@ export class KDInterp {
         let list: List<any> | null = null
         let mark = this.tokIndex
 
-        if(tok.kind!=TokenKind.LSquare)
+        if(tok.kind!==TokenKind.LSquare)
             throw new ParseError(`List must begin with a [, got「${TokenKind[tok.kind]}」`, tok.pos.columnEnd,
                 tok.pos.rowBegin)
 
         this.tokIndex++
 
-        if(TokenKind.Equals == this.current?.kind) {
+        if(TokenKind.Equals === this.current?.kind) {
             this.tokIndex = mark
             return this.parseMap()
         }
@@ -236,7 +237,7 @@ export class KDInterp {
             this.skipNewLines()
             tok = this.current
 
-            if(tok.kind == TokenKind.RSquare) {
+            if(tok.kind === TokenKind.RSquare) {
                 // move past the ]
                 this.tokIndex++
                 break;
@@ -244,7 +245,7 @@ export class KDInterp {
                 let literal = this.readLiteral()
 
                 // @ts-ignore
-                if(TokenKind.Equals == this.current?.kind) {
+                if(TokenKind.Equals === this.current?.kind) {
                     this.tokIndex = mark
                     return this.parseMap()
                 } else {
@@ -261,7 +262,7 @@ export class KDInterp {
     private parseCall(): Call {
 
         let tok = this.current
-        if(tok.kind != TokenKind.ID) {
+        if(tok.kind !== TokenKind.ID) {
             throw new ParseError("Call type must be an identifier.", tok.pos.columnBegin, tok.pos.rowBegin)
         }
         let name = tok.text
@@ -295,7 +296,7 @@ export class KDInterp {
             let last = this.peek(-1)
             throw new ParseError("Expected ) at end of call, but got EOF",
                 last?.pos.columnBegin ?? -1, last?.pos.rowBegin ?? -1)
-        } else if(tok.kind != TokenKind.RParen) {
+        } else if(tok.kind !== TokenKind.RParen) {
             throw new ParseError(`Expected ) at end of Call literal but got「${tok.text}」`,
                 tok.pos.columnBegin, tok.pos.rowBegin)
         }
@@ -335,18 +336,18 @@ export class KDInterp {
         let tok = this.current
         let map = new Map()
 
-        if(tok.kind!=TokenKind.LSquare)
+        if(tok.kind!==TokenKind.LSquare)
             throw new ParseError(`Map must begin with a [, got「${TokenKind[tok.kind]}」`, tok.pos.columnEnd,
                 tok.pos.rowBegin)
 
         this.tokIndex++
 
         // Check for empty Map literal
-        if(TokenKind.Equals == this.current?.kind) {
+        if(TokenKind.Equals === this.current?.kind) {
             this.tokIndex++
 
             // @ts-ignore
-            if(TokenKind.RSquare == this.current?.kind) {
+            if(TokenKind.RSquare === this.current?.kind) {
                 this.tokIndex++
                 return map
             } else {
@@ -359,13 +360,13 @@ export class KDInterp {
             let keyToken = this.current
 
             //  end of map
-            if(TokenKind.RSquare == keyToken?.kind) {
+            if(TokenKind.RSquare === keyToken?.kind) {
                 this.tokIndex++
                 break
             }
 
-            if(!(KDInterp.isSimpleLiteral(keyToken.kind) || TokenKind.ID == keyToken?.kind ||
-                TokenKind.LSquare == keyToken?.kind)) {
+            if(!(KDInterp.isSimpleLiteral(keyToken.kind) || TokenKind.ID === keyToken?.kind ||
+                TokenKind.LSquare === keyToken?.kind)) {
 
                 throw new ParseError(`Expected literal for map key but got ${TokenKind[keyToken?.kind]}`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
@@ -378,7 +379,7 @@ export class KDInterp {
             if(equalsToken == null) {
                 throw new ParseError(`Expected '=' after map key「${key}」but got EOL`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
-            } else if(equalsToken.kind != TokenKind.Equals) {
+            } else if(equalsToken.kind !== TokenKind.Equals) {
                 throw new ParseError(
                     `Expected '=' after attribute key「${key}」but got ${TokenKind[equalsToken.kind]}`,
                     keyToken.pos.columnEnd, keyToken.pos.rowBegin)
@@ -404,9 +405,9 @@ export class KDInterp {
         let tok = this.current
         let next = this.peek()
 
-        if(tok.kind==TokenKind.LSquare) {
+        if(tok.kind===TokenKind.LSquare) {
             return this.parseListOrMap()
-        } else if(TokenKind.ID == tok.kind && next && TokenKind.LParen == next.kind) {
+        } else if(TokenKind.ID === tok.kind && next && TokenKind.LParen === next.kind) {
             return this.parseCall()
         } else {
             this.tokIndex++
@@ -416,20 +417,20 @@ export class KDInterp {
 
     private static parseStringBlock(tok: Token<TokenKind>) {
         let text = tok.text.slice(1,-1)
-        if(text.indexOf("\n")==-1) return text
+        if(text.indexOf("\n")===-1) return text
 
-        let lines = text.split("\n");
-        if(lines[0].trim()=="") {
+        let lines = listOf<string>(...text.split("\n"));
+        if(lines[0].trim()==="") {
             lines = lines.slice(1)
         }
 
         let last = lines[lines.length-1]
-        if(last.trim()=="") {
+        if(last.trim()==="") {
             lines = lines.slice(0, lines.length-1)
             // grab whitespace prefix and remove it from other lines if present
             let prefix = last;
 
-            let trimmedLines = []
+            let trimmedLines = listOf<string>()
 
             for(const line of lines) {
                 if(line.startsWith(prefix)) {
@@ -452,7 +453,7 @@ export class KDInterp {
             case TokenKind.HexNumber: { return parseInt(tok.text.slice(2), 16) }
             case TokenKind.String: { return tok.text.slice(1,-1) }
             case TokenKind.StringBlock: { return KDInterp.parseStringBlock(tok) }
-            case TokenKind.Bool: { return tok.text == "true" }
+            case TokenKind.Bool: { return tok.text === "true" }
             case TokenKind.ID: { return tok.text } // bare string
             case TokenKind.nil: { return null }
             case TokenKind.URL: { return new URL(tok.text) }

@@ -31,7 +31,7 @@ function out(writer: Function, prefix: string, ...objs: any) {
 
     var line;
 
-    if(objs==null || objs.length == 0) {
+    if(objs==null || objs.length === 0) {
         line = ""
     } else {
         line = prefix
