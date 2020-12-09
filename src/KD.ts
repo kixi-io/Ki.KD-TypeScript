@@ -1,5 +1,16 @@
+import {KDInterp} from "./KDInterp";
 
 export class KD {
+
+    private static interp: KDInterp
+
+    static eval = (text: string) => (KD.interp) ? KD.interp.eval(text) :
+        (KD.interp=new KDInterp()).eval(text)
+
+    // TODO: This isn't very efficient.
+    static value = (text: string) => (KD.interp) ? KD.interp.eval("tag " + text).value() :
+        (KD.interp=new KDInterp()).eval("tag " + text).value()
+
     static stringify(it: any): string {
         if (it == null) {
             return "nil";

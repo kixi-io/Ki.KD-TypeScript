@@ -36,7 +36,7 @@ export class KDLexer {
 
     static tokenizer = buildLexer<TokenKind>([
         [true, /^0x[0-9A-Fa-f]+/g, TokenKind.HexNumber],
-        [true, /^(\d+-\d+-\d+)|(\d+\/\d+\/\d+)/g, TokenKind.Date],
+        [true, /^((\d+-\d+-\d+)|(\d+\/\d+\/\d+))/g, TokenKind.Date],
         [true, /^\d[\d_]*(\.\d+)?/g, TokenKind.Number],
         [true, /^"([^\\"]|\\")*"/g, TokenKind.String],
         [true, /^`([^\\`]|\\`)*`/g, TokenKind.StringBlock],
@@ -83,10 +83,7 @@ export class KDLexer {
             }
 
             while(true) {
-                /*
-                if(token.kind == TokenKind.NL) log("(NL)")
-                else log(`${token.text} (${TokenKind[token.kind]})`)
-                */
+                // console.log(`${token.text} (${TokenKind[token.kind]})`)
                 this.tokens.add(token)
 
                 token = token.next
