@@ -37,14 +37,14 @@ export class KDLexer {
     static tokenizer = buildLexer<TokenKind>([
         [true, /^0x[0-9A-Fa-f]+/g, TokenKind.HexNumber],
         [true, /^((\d+-\d+-\d+)|(\d+\/\d+\/\d+))/g, TokenKind.Date],
-        [true, /^\d[\d_]*(\.\d+)?/g, TokenKind.Number],
+        [true, /^-?((\d[\d_]*(\.\d+)?)|(\.\d+))/g, TokenKind.Number],
         [true, /^"([^\\"]|\\")*"/g, TokenKind.String],
         [true, /^`([^\\`]|\\`)*`/g, TokenKind.StringBlock],
         [true, /^(true|false)/g, TokenKind.Bool],
         [true, /^nil/g, TokenKind.nil],
 
         // TODO: Support unicode letters, numbers and emoji
-        [true, /^[a-zA-Z_.][\w._-]*/g, TokenKind.ID],
+        [true, /^[a-zA-Z_][\w._-]*/g, TokenKind.ID],
 
         [false, /^[\t\r ]+/g, TokenKind.Space],
 
@@ -66,7 +66,7 @@ export class KDLexer {
         [true,
             /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi,
             TokenKind.URL],
-        [true, /^\d[\d_]*(\.\d+)?[-a-zA-Z][-a-zA-Z0-9]*/g, TokenKind.Quantity],
+        [true, /^(-?((\d[\d_]*(\.\d+)?)|(\.\d+))[-a-zA-Z][-a-zA-Z0-9]*)/g, TokenKind.Quantity],
         // Comments
         // [false, /^(#|\/\/).*?$/g, TokenKind.LineComment],
         [false, /^(#|\/\/).*/g, TokenKind.LineComment],

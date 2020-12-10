@@ -1,4 +1,5 @@
 import {KDInterp} from "./KDInterp";
+import {KDLexer} from "./KDLexer";
 
 export class KD {
 
@@ -8,8 +9,7 @@ export class KD {
         (KD.interp=new KDInterp()).eval(text)
 
     // TODO: This isn't very efficient.
-    static value = (text: string) => (KD.interp) ? KD.interp.eval("tag " + text).value() :
-        (KD.interp=new KDInterp()).eval("tag " + text).value()
+    static value = (text: string) => KD.eval(`tag ${text}`).value()
 
     static stringify(it: any): string {
         if (it == null) {

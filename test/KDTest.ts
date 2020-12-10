@@ -2,8 +2,16 @@ import {QA} from './QA'
 import {KD, KDInterp, listOf, log} from "../src";
 import {Quantity} from "../src/Quantity";
 import {KDate} from "../src/KDate";
+import {KDLexer, TokenKind} from "../src/KDLexer";
 
 let qa = new QA("KD")
+
+qa.section("Numbers")
+qa.equals(5, KD.value("5"))
+qa.equals(-5, KD.value("-5"))
+qa.equals(5.5, KD.value("5.5"))
+qa.equals(.5, KD.value(".5"))
+qa.equals(-.5, KD.value("-.5"))
 
 qa.section("Basic")
 qa.equals(`foo 12 "bill" "hi" true false nil`, KD.eval("foo 12 bill `hi` true false nil").toString())
@@ -119,8 +127,17 @@ qa.equals("rgb(1, 2, 3)", "" + KD.value("rgb(1, 2, 3)"))
 
 qa.section("Quantities")
 
-Quantity.registerUnits("vh", "px")
+Quantity.registerUnits("vh", "vw", "px")
+let toks = new KDLexer("1.5vw .2px").tokens
+log("Quant tok test.", toks)
+log(TokenKind[toks[0].kind] + " " + TokenKind[toks[1].kind])
+
 qa.equals(new Quantity(2, "vh"), Quantity.parse("2vh"))
+qa.equals(new Quantity(-2, "px"), Quantity.parse("-2px"))
+qa.equals(new Quantity(.5, "vw"), Quantity.parse(".5vw"))
+qa.equals(new Quantity(-.5, "vw"), Quantity.parse("-.5vw"))
+qa.equals(new Quantity(1.5, "vw"), Quantity.parse("1.5vw"))
+qa.equals(new Quantity(1.5, "vw"), KD.value("1.5vw"))
 
 qa.throws(() => {
     new Quantity(2, "")

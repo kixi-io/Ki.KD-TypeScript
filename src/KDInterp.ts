@@ -446,10 +446,13 @@ export class KDInterp {
         return lines.join("\n")
     }
 
-    private static evalLiteral(tok: Token<TokenKind>) {
+    static evalLiteral(tok: Token<TokenKind>) {
 
         switch(tok.kind) {
-            case TokenKind.Number: { return +(tok.text.replace(/_/g, "")) }
+            case TokenKind.Number: {
+                let text = tok.text.replace(/_/g, "")
+                return (text.indexOf('.')!=-1) ? parseFloat(text) : parseInt(text)
+            }
             case TokenKind.HexNumber: { return parseInt(tok.text.slice(2), 16) }
             case TokenKind.String: { return tok.text.slice(1,-1) }
             case TokenKind.StringBlock: { return KDInterp.parseStringBlock(tok) }
