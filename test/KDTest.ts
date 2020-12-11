@@ -127,7 +127,7 @@ qa.equals("rgb(1, 2, 3)", "" + KD.value("rgb(1, 2, 3)"))
 
 qa.section("Quantities")
 
-Quantity.registerUnits("vh", "vw", "px")
+Quantity.registerUnits("vh", "vw", "px", "%")
 let toks = new KDLexer("1.5vw .2px").tokens
 log("Quant tok test.", toks)
 log(TokenKind[toks[0].kind] + " " + TokenKind[toks[1].kind])
@@ -138,6 +138,7 @@ qa.equals(new Quantity(.5, "vw"), Quantity.parse(".5vw"))
 qa.equals(new Quantity(-.5, "vw"), Quantity.parse("-.5vw"))
 qa.equals(new Quantity(1.5, "vw"), Quantity.parse("1.5vw"))
 qa.equals(new Quantity(1.5, "vw"), KD.value("1.5vw"))
+qa.equals(new Quantity(25, "%"), KD.value("25%"))
 
 qa.throws(() => {
     new Quantity(2, "")
