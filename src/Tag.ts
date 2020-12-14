@@ -24,7 +24,7 @@ export class Tag {
     }
 
     setAttribute(key:string | NSID, value:any) {
-        if(typeof "foo" === "string") {
+        if(typeof key === "string") {
             this.attributes.set(new NSID(key as string), value)
         } else {
             this.attributes.set(key as NSID, value)
