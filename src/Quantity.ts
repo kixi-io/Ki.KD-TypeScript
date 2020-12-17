@@ -33,6 +33,7 @@ export class Quantity {
     }
 
     static parse(text: String): Quantity {
+
         if (text.isBlank())
             throw new ParseError('Quantity requires a value and a unit. Got: ""')
 
@@ -41,6 +42,8 @@ export class Quantity {
         }
 
         let digitsEnd = 0
+        text = text.replace("_", "")
+
         if(text[0]==="-" || text[0]===".")
             digitsEnd++
 
@@ -51,8 +54,7 @@ export class Quantity {
             digitsEnd++
         }
 
-        return new Quantity(+text.substring(0, digitsEnd).replace("_", ""),
-            text.substring(digitsEnd))
+        return new Quantity(+(text.substring(0, digitsEnd)), text.substring(digitsEnd))
     }
 
     equals(obj: Quantity) : boolean {
