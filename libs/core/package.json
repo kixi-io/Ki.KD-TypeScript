@@ -1,0 +1,7 @@
+{
+	"name": "@kixi-io/ki.kd-typescript",
+	"version": "0.0.1",
+	"peerDependencies": {
+		"tslib": "^2.0.3"
+	}
+}

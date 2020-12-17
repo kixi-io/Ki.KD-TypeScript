@@ -1,0 +1,42 @@
+{
+	"version": 2,
+	"projects": {
+		"core": {
+			"root": "libs/core",
+			"sourceRoot": "libs/core/src",
+			"projectType": "library",
+			"targets": {
+				"lint": {
+					"executor": "@nrwl/linter:eslint",
+					"options": {
+						"lintFilePatterns": ["libs/core/**/*.ts"]
+					}
+				},
+				"test": {
+					"executor": "@nrwl/jest:jest",
+					"outputs": ["coverage/libs/core"],
+					"options": {
+						"jestConfig": "libs/core/jest.config.js",
+						"passWithNoTests": true,
+						"codeCoverage": true
+					}
+				},
+				"build": {
+					"executor": "@nrwl/node:package",
+					"outputs": ["{options.outputPath}"],
+					"options": {
+						"outputPath": "dist/@kixi-io/ki.kd-typescript",
+						"tsConfig": "libs/core/tsconfig.lib.json",
+						"packageJson": "libs/core/package.json",
+						"main": "libs/core/src/index.ts",
+						"assets": ["libs/core/*.md"]
+					}
+				}
+			}
+		}
+	},
+	"cli": {
+		"defaultCollection": "@nrwl/workspace"
+	},
+	"defaultProject": "core"
+}

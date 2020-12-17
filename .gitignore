@@ -1,42 +1,39 @@
-# Project exclude paths
-/src/ts-parsec/Parsers/AlternativeParser.js
-/src/ts-parsec/Parsers/AlternativeParser.js.map
-/src/ts-parsec/Parsers/AmbiguousParser.js
-/src/ts-parsec/Parsers/AmbiguousParser.js.map
-/src/ts-parsec/Parsers/ApplyParser.js
-/src/ts-parsec/Parsers/ApplyParser.js.map
-/src/ts-parsec/Parsers/ErrorParser.js
-/src/ts-parsec/Parsers/ErrorParser.js.map
-/src/ts-parsec/Parsers/OptionalParser.js
-/src/ts-parsec/Parsers/OptionalParser.js.map
-/src/ts-parsec/Parsers/ParserInterface.js
-/src/ts-parsec/Parsers/ParserInterface.js.map
-/src/ts-parsec/Parsers/RepeativeParser.js
-/src/ts-parsec/Parsers/RepeativeParser.js.map
-/src/ts-parsec/Parsers/Rule.js
-/src/ts-parsec/Parsers/Rule.js.map
-/src/ts-parsec/Parsers/SequencialParser.js
-/src/ts-parsec/Parsers/SequencialParser.js.map
-/src/ts-parsec/Parsers/TokenParser.js
-/src/ts-parsec/Parsers/TokenParser.js.map
-/src/ts-parsec/index.js
-/src/ts-parsec/index.js.map
-/src/Lexer.js
-/src/Lexer.js.map
-/src/KD.js
-/src/KD.js.map
-/src/KDLexer.js
-/src/KDLexer.js.map
-/src/KSL.js
-/src/KSL.js.map
-/src/List.js
-/src/List.js.map
-/src/Log.js
-/src/Log.js.map
-/src/KMath.js
-/src/KMath.js.map
-/src/Tag.js
-/src/Tag.js.map
-/src/Test.js
-/src/Test.js.map
-/src/
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/tmp
+/out-tsc
+
+# dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
