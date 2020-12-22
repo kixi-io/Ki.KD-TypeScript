@@ -1,0 +1,31 @@
+
+kd:doc-type com.pixki-tss // Tournlet Style Sheet
+
+/**
+ * This is the basic theme from which all other themes are derived
+ *
+ * @author Daniel Leuck
+ */
+
+name "Basic"
+
+# Background can be a CSS standard color name, hexadecimal int (e.g. 0xCC2084),
+# rgb(r,g,b) function or paintbox name.
+background white
+
+fonts {
+    base "Open Sans" size=[1rem 1.5vw] paint=black weight=400
+    title size=[3.2rem 1vw]
+    VS size=[3rem .8vw]
+    caption size=1rem
+    subcaption size=.8rem
+}
+
+options {
+    border 1px corner-radius=10 paint=black
+    glow paint=rgb(246, 225, 52) size=3rem
+}
+
+frame-icons {
+    // icon image="leaf.jpg" location=NW
+}
