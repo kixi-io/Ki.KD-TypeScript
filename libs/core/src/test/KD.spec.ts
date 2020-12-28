@@ -279,7 +279,7 @@ describe('KD', () => {
 			['1.5vw', 1.5, 'vw'],
 			['25%', 25, '%'],
 			['5px', 5, 'px'],
-			['foo 23rem', 23, 'rem'],
+			['23rem', 23, 'rem'],
 		];
 
 		describe.each(valueScenarios)('when input is: %s', (input, value, unit) => {

@@ -6,56 +6,60 @@ import { ParseError } from './ParseError';
 import { listOf } from './_internal';
 
 export class Quantity {
-	value: number;
-	unit: string;
 
-	private static units = listOf<string>();
-	private static digits = listOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.');
+  value: number
+  unit: string
 
-	constructor(value: number, unit: string) {
-		if (!value || !unit || unit.isEmpty()) {
-			throw new ParseError('Quantity requires a value and a unit.');
-		}
+  private static units = listOf<string>()
+  private static digits = listOf("0","1","2","3","4","5","6","7","8","9",".")
 
-		this.value = value;
-		Quantity.checkUnit(unit);
-		this.unit = unit;
-	}
+  constructor(value: number, unit: string) {
+    if (!value || !unit || unit.isEmpty()) {
+      throw new ParseError("Quantity requires a value and a unit.")
+    }
 
-	static checkUnit(unit: string) {
-		if (!Quantity.units.contains(unit))
-			throw new ParseError(`${unit} is not a registered unit. Registered: ${Quantity.units}`);
-	}
+    this.value = value
+    Quantity.checkUnit(unit)
+    this.unit = unit
+  }
 
-	static registerUnits(...units: string[]) {
-		this.units.addAll(...units);
-	}
+  static checkUnit(unit:string) {
+    if(!Quantity.units.contains(unit))
+      throw new ParseError(`${unit} is not a registered unit. Registered: ${Quantity.units}`)
+  }
 
-	static parse(text: String): Quantity {
-		if (text.isBlank()) throw new ParseError('Quantity requires a value and a unit. Got: ""');
+  static registerUnits(...units: string[]) {
+    this.units.addAll(...units)
+  }
 
-		if (!Quantity.digits.contains(text[0]) && text[0] !== '-') {
-			throw new ParseError(`Quantity must start with a digit, '.' or '-'. Got '${text[0]}'`);
-		}
+  static parse(text: String): Quantity {
 
-		let digitsEnd = 0;
-		text = text.replace('_', '');
+    if (text.isBlank())
+      throw new ParseError('Quantity requires a value and a unit. Got: ""')
 
-		if (text[0] === '-' || text[0] === '.') digitsEnd++;
+    if (!Quantity.digits.contains(text[0]) && text[0]!=="-") {
+      throw new ParseError(`Quantity must start with a digit, '.' or '-'. Got '${text[0]}'`)
+    }
 
-		for (; ; digitsEnd < text.length) {
-			if (this.digits.indexOf(text[digitsEnd]) == -1) {
-				break;
-			}
-			digitsEnd++;
-		}
+    let digitsEnd = 0
+    text = text.replace("_", "")
 
-		return new Quantity(+text.substring(0, digitsEnd), text.substring(digitsEnd));
-	}
+    if(text[0]==="-" || text[0]===".")
+      digitsEnd++
 
-	equals(obj: Quantity): boolean {
-		return obj != null && obj.value === this.value && obj.unit === this.unit;
-	}
+    for (;;digitsEnd < text.length) {
+      if (this.digits.indexOf(text[digitsEnd])==-1) {
+        break;
+      }
+      digitsEnd++
+    }
 
-	toString = () => `${this.value}${this.unit}`;
+    return new Quantity(+(text.substring(0, digitsEnd)), text.substring(digitsEnd))
+  }
+
+  equals(obj: Quantity) : boolean {
+    return obj!=null && obj.value === this.value && obj.unit === this.unit
+  }
+
+  toString = () => `${this.value}${this.unit}`
 }
