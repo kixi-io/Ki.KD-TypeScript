@@ -13,10 +13,6 @@ export class KDate {
 	day: number;
 
 	constructor(year: number, month: number, day: number) {
-		if (!year || !month || !day) {
-			throw new ParseError('Date requires a year, month and day');
-		}
-
 		this.year = year;
 		this.month = month;
 		this.day = day;

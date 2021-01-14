@@ -14,8 +14,8 @@ export class Quantity {
   private static digits = listOf("0","1","2","3","4","5","6","7","8","9",".")
 
   constructor(value: number, unit: string) {
-    if (!value || !unit || unit.isEmpty()) {
-      throw new ParseError("Quantity requires a value and a unit.")
+    if (unit.isEmpty()) {
+      throw new ParseError("Quantity requires a unit.")
     }
 
     this.value = value
