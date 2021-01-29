@@ -10,6 +10,7 @@ describe('KD', () => {
 			['5.5', 5.5],
 			['.5', 0.5],
 			['-.5', -0.5],
+      ['-0.5', -0.5],
 			['0xFF', 255],
 		];
 
@@ -291,7 +292,7 @@ describe('KD', () => {
 		});
 
 		const errorScenarios: Array<[number, string, string]> = [
-			[2, '', 'Quantity requires a value and a unit.'],
+			[2, '', 'Quantity requires a unit.'],
 			[2, 'eon', 'eon is not a registered unit.'],
 		];
 
