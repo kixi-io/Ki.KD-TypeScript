@@ -29,7 +29,13 @@ export class Tag {
 	}
 
 	getAttribute(key: string | NSID): any {
-		return this.attributes.get(key instanceof NSID ? key : new NSID(key));
+    // hack because object equality in TS / JS is a mess
+    for (const [k, v] of this.attributes) {
+      if(k.toString() === key)
+        return v;
+    }
+    // return this.attributes.get(key instanceof NSID ? key : new NSID(key))
+    return null;
 	}
 
 	get name(): String {
