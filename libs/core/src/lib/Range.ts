@@ -4,36 +4,36 @@ const underscore = '_';
 const closed = '<';
 
 export class Range {
-	min: number | string;
-	max: number | string;
+  left: number;
+  right: number;
 	isOpenLeft: boolean;
 	isOpenRight: boolean;
-	isReversed: boolean;
 
 	constructor(
-		left: number | string = underscore,
+		left: number | string,
 		right: number | string = underscore,
 		openLeft: boolean = true,
 		openRight: boolean = true
 	) {
 		this.checkValues(left, right);
-		const leftValue = left === underscore ? -Infinity : +left;
-		const rightValue = right === underscore ? Infinity : +right;
+		this.left = left === underscore ? -Infinity : +left;
+		this.right = right === underscore ? Infinity : +right;
 
-		this.isReversed = leftValue > rightValue;
-
-		if (leftValue > rightValue) {
-			this.min = rightValue;
-			this.max = leftValue;
-			this.isOpenLeft = openRight;
-			this.isOpenRight = openLeft;
-		} else {
-			this.min = leftValue;
-			this.max = rightValue;
-			this.isOpenLeft = openLeft;
-			this.isOpenRight = openRight;
-		}
+    this.isOpenLeft = openLeft;
+    this.isOpenRight = openRight;
 	}
+
+  get min() {
+    return Math.min(this.left, this.right);
+  }
+
+  get max() {
+    return Math.max(this.left, this.right);
+  }
+
+  get isReversed() {
+    return this.left > this.max;
+  }
 
 	public contains(element: number) {
 		const inLeft = this.isOpenLeft ? element >= this.min : element > this.min;
@@ -56,16 +56,16 @@ export class Range {
 	equals(obj: Range): boolean {
 		return (
 			obj !== null &&
-			obj.min === this.min &&
-			obj.max === this.max &&
+			obj.left === this.left &&
+			obj.right === this.right &&
 			obj.isOpenRight === this.isOpenRight &&
 			obj.isOpenLeft === this.isOpenLeft
 		);
 	}
 
 	toString = () =>
-		`${this.min === -Infinity ? underscore : this.min}${this.isOpenLeft ? '' : closed}..${this.isOpenRight ? '' : closed}${
-			this.max === Infinity ? underscore : this.max
+		`${this.left === -Infinity ? underscore : this.left}${this.isOpenLeft ? '' : closed}..${this.isOpenRight ? '' : closed}${
+			this.right === Infinity ? underscore : this.right
 		}`;
 
 	private static parseOperator(operator: string, right: boolean) {

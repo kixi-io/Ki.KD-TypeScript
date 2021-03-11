@@ -314,9 +314,9 @@ describe('KD', () => {
 				['1..<5', 1, 5, true, false, '1..<5'],
 				['_..<5', '_', 5, true, false, '_..<5'],
 				['1.._', 1, '_', true, true, '1.._'],
-				['5..1', 5, 1, true, true, '1..5'],
-				['5<..<1', 5, 1, false, false, '1<..<5'],
-				['5<..1', 5, 1, false, true, '1..<5'],
+				['5..1', 5, 1, true, true, '5..1'],
+				['5<..<1', 5, 1, false, false, '5<..<1'],
+				['5<..1', 5, 1, false, true, '5<..1'],
 			];
 			describe.each(parseScenarios)('when input is: %s', (input, left, right, openLeft, openRight, stringRes) => {
 				const r = new Range(left, right, openLeft, openRight);
@@ -327,7 +327,7 @@ describe('KD', () => {
 
 		describe('Inclusive contains', () => {
 			// Inclusive on left and right 1..10
-			const r = new Range(1, 10);
+			const r = new Range(10, 1);
 
 			const falseValues = [-1, 0, 11];
 			describe.each(falseValues)('Should not contain', value => {
