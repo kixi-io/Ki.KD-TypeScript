@@ -3,6 +3,7 @@ interface String {
 	isBlank(): boolean;
 	padEnd(places: number, char: string, trim: boolean): string;
 	compareTo(val: string): number;
+	equals(val: string): boolean;
 }
 
 interface Array<T> {
@@ -12,4 +13,5 @@ interface Array<T> {
 
 interface Number {
 	compareTo(val: number): number;
+	equals(val: number): boolean;
 }
