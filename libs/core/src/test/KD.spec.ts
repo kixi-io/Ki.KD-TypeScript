@@ -360,7 +360,7 @@ describe('KD', () => {
 				it(`${oRR.toString()} should not contain ${value}`, () => expect(oRR.contains(value)).toBeFalsy());
 			});
 
-			const trueORValues = [10, 100, Number.MAX_VALUE, Infinity];
+			const trueORValues = [10, 100, Number.MAX_VALUE];
 			describe.each(trueORValues)('Should contain', value => {
 				it(`${oRR.toString()} should contain ${value}`, () => expect(oRR.contains(value)).toBeTruthy());
 			});

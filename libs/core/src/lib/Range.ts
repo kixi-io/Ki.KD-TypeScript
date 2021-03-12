@@ -1,17 +1,21 @@
 import { ParseError } from './ParseError';
-
+import { Quantity } from './_internal';
+import './String+';
+import './Number+';
 const underscore = '_';
 const closed = '<';
 
+type RangeValue = number | string | Quantity;
+
 export class Range {
-  left: number;
-  right: number;
+  left: RangeValue;
+  right: RangeValue;
 	isOpenLeft: boolean;
 	isOpenRight: boolean;
 
 	constructor(
-		left: number | string,
-		right: number | string = underscore,
+		left: RangeValue = underscore,
+		right: RangeValue = underscore,
 		openLeft: boolean = true,
 		openRight: boolean = true
 	) {
@@ -24,31 +28,66 @@ export class Range {
 	}
 
   get min() {
-    return Math.min(this.left, this.right);
+    // try {
+    //   if ((this.left as Quantity).compareTo(this.right as Quantity) <= 0)
+    //     return this.left;
+    //   else
+    //     return this.right;
+    // } catch {}
+    // return Math.min(this.left as number, this.right as number);
+    return (this.left as any).compareTo(this.right) <= 0 ? this.left : this.right;
   }
 
   get max() {
-    return Math.max(this.left, this.right);
+    // try {
+    //   if ((this.left as Quantity).compareTo(this.right as Quantity) > 0)
+    //     return this.left;
+    //   else
+    //     return this.right;
+    // } catch {}
+    // return Math.max(this.left as number, this.right as number);
+
+    return (this.left as any).compareTo(this.right) > 0 ? this.left : this.right;
   }
 
   get isReversed() {
-    return this.left > this.max;
+    return (this.left as any).compareTo(this.right) > 0;
   }
 
-	public contains(element: number) {
-		const inLeft = this.isOpenLeft ? element >= this.min : element > this.min;
-		const inRight = this.isOpenRight ? element <= this.max : element < this.max;
+	public contains(element: RangeValue) {
+    let inLeft = false;
+    let inRight = false;
 
-		return inLeft && inRight;
+    // try {
+      const compareResMin = (this.min as any).compareTo(element);
+      inLeft =  this.isOpenLeft ? compareResMin <= 0 : compareResMin < 0;
+
+      if (!inLeft) return false;
+
+      const compareResMax = (this.max as any).compareTo(element);
+      inRight =  this.isOpenRight ? compareResMax >= 0 : compareResMax > 0;
+
+      return inRight;
+    // } catch {
+    //   inLeft = this.isOpenLeft ? element >= this.min : element > this.min;
+    //   inRight = this.isOpenRight ? element <= this.max : element < this.max;
+    //   return inLeft && inRight;
+    // }
+
 	}
 
-	static parse(text: String): Range {
+	static parse(text: string): Range {
 		if (text.isBlank()) throw new ParseError('Range requires a value. Got: ""');
 
 		const [leftOperatorString, rightOperatorString] = text.split('..');
 
 		const leftOperator = this.parseOperator(leftOperatorString, false);
 		const rightOperator = this.parseOperator(rightOperatorString, true);
+
+    try {
+      leftOperator.value = Quantity.parse(leftOperator.value);
+      rightOperator.value = Quantity.parse(rightOperator.value);
+    } catch { } // object is not a quantity
 
 		return new Range(leftOperator.value, rightOperator.value, leftOperator.isOpen, rightOperator.isOpen);
 	}
@@ -72,10 +111,10 @@ export class Range {
 		const res = operator.split(closed);
 		const [value, openChar] = right ? res.reverse() : res;
 
-		return { value, isOpen: !openChar && typeof openChar !== 'string' };
+		return { value: value as any, isOpen: !openChar && typeof openChar !== 'string' };
 	}
 
-	private checkValues(left: number | string, right: number | string) {
+	private checkValues(left: RangeValue, right: RangeValue) {
 		if (left === underscore && right === underscore) {
 			throw new ParseError('Range requires at least one value.');
 		}
