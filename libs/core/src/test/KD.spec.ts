@@ -1,6 +1,6 @@
 import { KDate } from '../lib/KDate';
 import { Quantity } from '../lib/Quantity';
-import { Range } from '../lib/Range';
+import { Range, RangeValue } from '../lib/Range';
 import { KD, listOf } from '../lib/_internal';
 
 describe('KD', () => {
@@ -273,7 +273,7 @@ describe('KD', () => {
 
 		describe.each(parseScenarios)('when input is: %s', (input, value, unit) => {
 			it('should match', () => {
-				expect(Quantity.parse(input).toString()).toEqual(new Quantity(value, unit).toString());
+				  expect(Quantity.parse(input).toString()).toEqual(new Quantity(value, unit).toString());
 			});
 		});
 
@@ -302,26 +302,37 @@ describe('KD', () => {
 				new Quantity(value, unit);
 			}).toThrowError(expectedError);
 		});
+
+		const compareScenarios: Array<[number, string, number, string, number]> = [
+			[1.5, 'vw', 1.5, 'vw', 0],
+			[25, '%', 1.5, '%', 23.5],
+			[5, 'px', 20, 'px', 15],
+		];
+		describe.each(compareScenarios)('when input is %o', (value, unit, targetValue, targetUnit, compareRes) => {
+			it(`compare should match ${compareRes}`, () => {
+				expect(new Quantity(value, unit).compareTo(new Quantity(targetValue, targetUnit)) === compareRes);
+			});
+		});
 	});
 
   describe('Range', () => {
-		const open = '_';
-
+    const open = '_';
+    Quantity.registerUnits('vh', 'vw', 'em', 'rem', 'px', '%');
 		describe('Parse', () => {
-			const parseScenarios: Array<[string, number | string, number | string, boolean, boolean, string]> = [
-				['1..5', 1, 5, true, true, '1..5'],
+			const parseScenarios: Array<[string, RangeValue, RangeValue, boolean, boolean, string]> = [
+				['1px..5px', new Quantity(1, 'px'), new Quantity(5, 'px'), true, true, '1px..5px'],
 				['1<..5', 1, 5, false, true, '1<..5'],
-				['1..<5', 1, 5, true, false, '1..<5'],
+				['1px..<5px', new Quantity(1, 'px'), new Quantity(5, 'px'), true, false, '1px..<5px'],
 				['_..<5', '_', 5, true, false, '_..<5'],
-				['1.._', 1, '_', true, true, '1.._'],
+				['1px.._', new Quantity(1, 'px'), '_', true, true, '1px.._'],
 				['5..1', 5, 1, true, true, '5..1'],
-				['5<..<1', 5, 1, false, false, '5<..<1'],
+				['5px<..<1px', new Quantity(5, 'px'), new Quantity(1, 'px'), false, false, '5px<..<1px'],
 				['5<..1', 5, 1, false, true, '5<..1'],
 			];
 			describe.each(parseScenarios)('when input is: %s', (input, left, right, openLeft, openRight, stringRes) => {
 				const r = new Range(left, right, openLeft, openRight);
-				it(`parse should match ${stringRes}`, () => expect(Range.parse(input).equals(r)).toBeTruthy());
 				it(`toString() should match ${stringRes}`, () => expect(stringRes).toEqual(r.toString()));
+				it(`parse should match ${stringRes}`, () => expect(Range.parse(input).equals(r)).toBeTruthy());
 			});
 		});
 
@@ -340,14 +351,14 @@ describe('KD', () => {
 			});
 
 			// Inclusive and open on left _..10
-			const oLR = new Range(open, 10);
+			const oLR = new Range(open, new Quantity(10, 'vh'));
 
-			const falseOLValues = [11, 100];
+			const falseOLValues = [new Quantity(11, 'vh'), new Quantity(100, 'vh')];
 			describe.each(falseOLValues)('Should not contain', value => {
 				it(`${oLR.toString()} should not contain ${value}`, () => expect(oLR.contains(value)).toBeFalsy());
 			});
 
-			const trueOLValues = [-10, 0, 10];
+			const trueOLValues = [new Quantity(-10, 'vh'), new Quantity(0, 'vh'), new Quantity(10, 'vh')];
 			describe.each(trueOLValues)('Should contain', value => {
 				it(`${oLR.toString()} should contain ${value}`, () => expect(oLR.contains(value)).toBeTruthy());
 			});
@@ -382,14 +393,14 @@ describe('KD', () => {
 			});
 
 			// Exclusive left range 0.0<..10.0
-			const xLR = new Range(0.0, 10.0, false);
+			const xLR = new Range(new Quantity(0.0, 'vw'), new Quantity(10.0, 'vw'), false);
 
-			const falseXLValues = [0.0, 10.1];
+			const falseXLValues = [new Quantity(0.0, 'vw'), new Quantity(10.1, 'vw')];
 			describe.each(falseXLValues)('Should not contain', value => {
 				it(`${xLR.toString()} should not contain ${value}`, () => expect(xLR.contains(value)).toBeFalsy());
 			});
 
-			const trueXLValues = [10.0, 5.0, 0.1];
+			const trueXLValues = [new Quantity(10.0, 'vw'), new Quantity(5.0, 'vw'), new Quantity(0.1, 'vw')];
 			describe.each(trueXLValues)('Should contain', value => {
 				it(`${xLR.toString()} should contain ${value}`, () => expect(xLR.contains(value)).toBeTruthy());
 			});

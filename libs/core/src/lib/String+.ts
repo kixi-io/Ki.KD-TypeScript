@@ -23,4 +23,8 @@ if (!String.prototype.isEmpty) {
 
 		return 0;
 	};
+
+  String.prototype.equals = function (val: string): boolean {
+		return this === val.toString();
+	};
 }
