@@ -40,18 +40,26 @@ export class Range {
 	}
 
 	public contains(element: RangeValue) {
-		let inLeft = false;
-		let inRight = false;
+		let inMin = false;
+		let inMax = false;
 
-		const compareResMin = (this.min as any).compareTo(element);
-		inLeft = this.isOpenLeft ? compareResMin <= 0 : compareResMin < 0;
+    if (this.min === -Infinity) {
+      inMin = true;
+    } else {
+      const compareResMin = (this.min as any).compareTo(element);
+      inMin = this.isReversed && this.isOpenRight || this.isOpenLeft ? compareResMin <= 0 : compareResMin < 0;
+    }
 
-		if (!inLeft) return false;
+		if (!inMin) return false;
 
-		const compareResMax = (this.max as any).compareTo(element);
-		inRight = this.isOpenRight ? compareResMax >= 0 : compareResMax > 0;
+    if (this.max === Infinity) {
+      inMax = true;
+    } else {
+    const compareResMax = (this.max as any).compareTo(element);
+      inMax = this.isReversed && this.isOpenLeft || this.isOpenRight ? compareResMax >= 0 : compareResMax > 0;
+    }
 
-		return inRight;
+		return inMax;
 	}
 
 	static parse(text: string): Range {

@@ -63,7 +63,7 @@ export class Quantity {
 	 */
 	compareTo(obj: Quantity): number {
 		if (obj.unit !== this.unit) throw 'Quantities must have the same unit to be compared';
-		return this.value - obj.value;
+		return this.value.compareTo(obj.value);
 	}
 
 	toString = () => `${this.value}${this.unit}`;
