@@ -13,6 +13,7 @@ export enum TokenKind {
 	URL,
 	Quantity,
 	Date,
+	Range,
 
 	LSquare,
 	RSquare,
@@ -71,6 +72,7 @@ export class KDLexer {
 			TokenKind.URL,
 		],
 		[true, /^-?((\d[\d_]*(\.\d+)?)|(\.\d+))(([-a-zA-Z][-a-zA-Z0-9]*)|%)/g, TokenKind.Quantity],
+		[true, /^[\d|_]+(<)?(\.\.)(<)?[\d|_]+/g, TokenKind.Range],
 		// Comments
 		// [false, /^(#|\/\/).*?$/g, TokenKind.LineComment],
 		[false, /^(#|\/\/).*/g, TokenKind.LineComment],

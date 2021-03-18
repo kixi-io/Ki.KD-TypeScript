@@ -6,60 +6,65 @@ import { ParseError } from './ParseError';
 import { listOf } from './_internal';
 
 export class Quantity {
+	value: number;
+	unit: string;
 
-  value: number
-  unit: string
+	private static units = listOf<string>();
+	private static digits = listOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.');
 
-  private static units = listOf<string>()
-  private static digits = listOf("0","1","2","3","4","5","6","7","8","9",".")
+	constructor(value: number, unit: string) {
+		if (unit.isEmpty()) {
+			throw new ParseError('Quantity requires a unit.');
+		}
 
-  constructor(value: number, unit: string) {
-    if (unit.isEmpty()) {
-      throw new ParseError("Quantity requires a unit.")
-    }
+		this.value = value;
+		Quantity.checkUnit(unit);
+		this.unit = unit;
+	}
 
-    this.value = value
-    Quantity.checkUnit(unit)
-    this.unit = unit
-  }
+	static checkUnit(unit: string) {
+		if (!Quantity.units.contains(unit))
+			throw new ParseError(`${unit} is not a registered unit. Registered: ${Quantity.units}`);
+	}
 
-  static checkUnit(unit:string) {
-    if(!Quantity.units.contains(unit))
-      throw new ParseError(`${unit} is not a registered unit. Registered: ${Quantity.units}`)
-  }
+	static registerUnits(...units: string[]) {
+		this.units.addAll(...units);
+	}
 
-  static registerUnits(...units: string[]) {
-    this.units.addAll(...units)
-  }
+	static parse(text: String): Quantity {
+		if (text.isBlank()) throw new ParseError('Quantity requires a value and a unit. Got: ""');
 
-  static parse(text: String): Quantity {
+		if (!Quantity.digits.contains(text[0]) && text[0] !== '-') {
+			throw new ParseError(`Quantity must start with a digit, '.' or '-'. Got '${text[0]}'`);
+		}
 
-    if (text.isBlank())
-      throw new ParseError('Quantity requires a value and a unit. Got: ""')
+		let digitsEnd = 0;
+		text = text.replace('_', '');
 
-    if (!Quantity.digits.contains(text[0]) && text[0]!=="-") {
-      throw new ParseError(`Quantity must start with a digit, '.' or '-'. Got '${text[0]}'`)
-    }
+		if (text[0] === '-' || text[0] === '.') digitsEnd++;
 
-    let digitsEnd = 0
-    text = text.replace("_", "")
+		for (; ; digitsEnd < text.length) {
+			if (this.digits.indexOf(text[digitsEnd]) == -1) {
+				break;
+			}
+			digitsEnd++;
+		}
 
-    if(text[0]==="-" || text[0]===".")
-      digitsEnd++
+		return new Quantity(+text.substring(0, digitsEnd), text.substring(digitsEnd));
+	}
 
-    for (;;digitsEnd < text.length) {
-      if (this.digits.indexOf(text[digitsEnd])==-1) {
-        break;
-      }
-      digitsEnd++
-    }
+	equals(obj: Quantity): boolean {
+		return obj != null && obj.value === this.value && obj.unit === this.unit;
+	}
 
-    return new Quantity(+(text.substring(0, digitsEnd)), text.substring(digitsEnd))
-  }
+	/** Compares one Quantity with another
+	 * @param {Quantity} obj - The quantity to compare against
+	 * @returns {number} 0 if equal, < 0 if lower than, > 0 if greater than
+	 */
+	compareTo(obj: Quantity): number {
+		if (obj.unit !== this.unit) throw 'Quantities must have the same unit to be compared';
+		return this.value.compareTo(obj.value);
+	}
 
-  equals(obj: Quantity) : boolean {
-    return obj!=null && obj.value === this.value && obj.unit === this.unit
-  }
-
-  toString = () => `${this.value}${this.unit}`
+	toString = () => `${this.value}${this.unit}`;
 }

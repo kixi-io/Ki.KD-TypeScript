@@ -15,4 +15,16 @@ if (!String.prototype.isEmpty) {
 
 		return this + char.repeat(places - this.length);
 	};
+
+	String.prototype.compareTo = function (val: string): number {
+		if (this < val) return -1;
+		if (this === val) return 0;
+		if (this > val) return 1;
+
+		return 0;
+	};
+
+  String.prototype.equals = function (val: string): boolean {
+		return this === val.toString();
+	};
 }

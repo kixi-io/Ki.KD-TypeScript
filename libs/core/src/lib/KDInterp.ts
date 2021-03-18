@@ -107,6 +107,7 @@ export class KDInterp {
 			case TokenKind.URL:
 			case TokenKind.Quantity:
 			case TokenKind.Date:
+			case TokenKind.Range:
 				return true;
 		}
 
